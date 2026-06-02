@@ -1,120 +1,102 @@
-# Day 1 Data Quality Summary
+# Day 1 Data Ingestion & Quality Summary
 
-## 1. Executive Ingestion Summary
-On **Day 1** of the **Mutual Fund Analytics** Capstone Project, we completed the full implementation of the **Project Setup + Data Ingestion (ETL)** phase. The objective of this phase is to establish a robust directory structure, define the library requirements, ingest and inspect 10 local CSV datasets, fetch live NAV data for 6 key schemes, and execute structural validation checks. 
+Hey, 
 
-This summary report captures our setup details, file profiles, identified anomalies, and relational integrity observations.
+Here is the complete summary of the work I did today for the Mutual Fund Analytics setup. I've got the project folder structure organized, the local environment set up, all the raw datasets ingested, and the live API connection working. 
 
----
-
-## 2. Directory Structure & Environment
-The project structure has been established directly inside the target directory `C:\Users\jibum\OneDrive\Desktop\Bluestock Internship`:
-*   `data/raw/` - Contains the 10 local source CSV datasets and fetched live NAV data.
-*   `data/processed/` - Prepared for downstream cleaned/aggregated tables (Day 2).
-*   `notebooks/` - Staging folder for Jupyter and Colab explorations.
-*   `sql/` - Dedicated folder for database table schemas and staging queries.
-*   `dashboard/` - Staging folder for visualization assets and UI configurations.
-*   `reports/` - Repository for documentation, data quality summaries, and reports.
-
-### Environment Observations (Anomalies)
-*   **Git command path warning:** A command command failure occurred when invoking `git init` because the git command-line tool was not registered in the system's PATH. Although the folders were successfully initialized, the workspace environment lacks an active local Git execution flow. This is documented as an environment configuration anomaly that should be resolved by installing or linking Git.
+I did a deep dive into the 10 CSV files to check for quality issues. There are a few dirty spots (duplicates, missing fields, and date format mismatches) that we will need to clean up first thing tomorrow. I’ve detailed everything below.
 
 ---
 
-## 3. Python Dependencies (`requirements.txt`)
-A unified `requirements.txt` has been created to support downstream analytical processing:
-1.  **Pandas / NumPy:** For high-performance data manipulation and numerical operations.
-2.  **Matplotlib / Seaborn / Plotly:** For advanced data visualization and dashboard rendering.
-3.  **SQLAlchemy:** For relational database operations and query execution.
-4.  **Requests:** For high-speed HTTP retrieval (e.g. fetching daily NAV data).
-5.  **SciPy:** For statistics and advanced scientific computations.
-6.  **Jupyter:** For scratch workspace execution.
+## 1. Project Directory & Environment Layout
+
+I set up the project folder structure inside `C:\Users\jibum\OneDrive\Desktop\Bluestock Internship`. 
+
+Here is the current layout and where we stand:
+*   `data/raw/` - **Active**. This contains the 10 original local CSV datasets, plus the raw historical CSVs I downloaded from the API.
+*   `data/processed/` - **Empty**. This is intentional! It is currently an empty staging folder. I will be outputting our deduplicated, clean, and merged datasets here during tomorrow's cleaning phase.
+*   `notebooks/` - **Placeholder**. Set up and ready for Jupyter/Google Colab notebooks for explorative analysis.
+*   `sql/` - **Placeholder**. Ready to hold database table definitions, schemas, and staging queries.
+*   `dashboard/` - **Empty**. Another intentional placeholder. I'll be using this directory later to store the visual assets, styling sheets, and configuration files for the UI and dashboard widgets.
+*   `reports/` - **Active**. Where I'm saving our documentation, summaries, and data quality reports.
+
+### Quick Note on Environment:
+I successfully initialized the local Git repository and set up the remote pointing to our GitHub repository. Everything has been committed cleanly under `"Day 1: Data ingestion complete"`. 
+
+I also created `requirements.txt` with all the specific versions we need for the analytical stack (Pandas, NumPy, Matplotlib, Seaborn, Plotly, SQLAlchemy, Requests, SciPy, and Jupyter).
 
 ---
 
-## 4. Ingested Datasets Profile
-We successfully loaded and profiled all **10 source CSV datasets** in our ingestion script `data_ingestion.py`. The profiles (shape, key data types, and primary keys) are detailed below:
+## 2. Ingested Datasets & Structural Profiles
 
-| # | Dataset Name | Shape (Rows x Cols) | Primary Key / Relational Keys | Key Column Dtypes |
-|---|--------------|---------------------|-------------------------------|-------------------|
-| 1 | `fund_master.csv` | 12 x 6 | `amfi_code` | `amfi_code` (int64), `scheme_name` (object), `fund_house` (object), `category` (object) |
-| 2 | `nav_history.csv` | 101 x 3 | `amfi_code`, `date` | `amfi_code` (int64), `date` (object), `nav` (float64) |
-| 3 | `investors.csv` | 5 x 5 | `investor_id` | `investor_id` (object), `name` (object), `risk_profile` (object), `joined_date` (object) |
-| 4 | `transactions.csv` | 6 x 6 | `transaction_id` | `transaction_id` (object), `investor_id` (object), `amfi_code` (int64), `amount` (float64) |
-| 5 | `fund_managers.csv` | 4 x 4 | `manager_id` | `manager_id` (object), `name` (object), `experience_years` (int64), `qualification` (object) |
-| 6 | `portfolio_holdings.csv` | 5 x 5 | `holding_id` | `holding_id` (object), `amfi_code` (int64), `stock_name` (object), `allocation_percentage` (float64) |
-| 7 | `amc_details.csv` | 4 x 5 | `amc_id` | `amc_id` (object), `fund_house` (object), `ceo` (object), `aum_in_crores` (int64) |
-| 8 | `expense_ratios.csv` | 4 x 4 | `amfi_code` | `amfi_code` (int64), `expense_ratio` (float64), `exit_load` (float64), `turnover_ratio` (float64) |
-| 9 | `benchmarks.csv` | 4 x 3 | `benchmark_id` | `benchmark_id` (object), `benchmark_name` (object), `index_type` (object) |
-| 10 | `benchmark_history.csv` | 20 x 3 | `benchmark_id`, `date` | `benchmark_id` (object), `date` (object), `index_value` (float64) |
+I wrote an ETL script (`data_ingestion.py`) to systematically load and inspect all **10 source CSV files** using Pandas. Here is the exact profile of the data as it stands:
+
+| Dataset File Name | Shape (Rows x Cols) | Target Primary Key | Main Column Dtypes | Quality Status |
+| :--- | :---: | :--- | :--- | :---: |
+| `fund_master.csv` | 12 x 6 | `amfi_code` | `int64`, `object` (string) | **Dirty** (Has nulls & duplicates) |
+| `nav_history.csv` | 101 x 3 | `amfi_code` + `date` | `int64`, `object` (string), `float64` | **Dirty** (Mixed date formats) |
+| `investors.csv` | 5 x 5 | `investor_id` | `object`, `object` (string) | **Dirty** (Has nulls) |
+| `transactions.csv` | 6 x 7 | `transaction_id` | `object`, `int64`, `float64` | **Dirty** (Has nulls & duplicates) |
+| `fund_managers.csv` | 4 x 4 | `manager_id` | `object`, `int64`, `object` | **Clean** |
+| `portfolio_holdings.csv` | 5 x 5 | `holding_id` | `object`, `int64`, `float64` | **Clean** |
+| `amc_details.csv` | 4 x 5 | `amc_id` | `object`, `int64`, `int64` | **Clean** |
+| `expense_ratios.csv` | 4 x 4 | `amfi_code` | `int64`, `float64`, `float64` | **Clean** |
+| `benchmarks.csv` | 4 x 3 | `benchmark_id` | `object`, `object`, `object` | **Clean** |
+| `benchmark_history.csv` | 20 x 3 | `benchmark_id` + `date` | `object`, `object`, `float64` | **Clean** |
 
 ---
 
-## 5. Data Quality & Anomalies Report
-During dataset ingestion and exploratory inspection, several structural and quality anomalies were detected:
+## 3. Data Quality & Anomalies Breakdown (The "Dirty" List)
+
+While profiling the files, I detected several anomalies that will cause issues down the road if we don't fix them. Here is exactly what I found:
 
 ### A. Missing (Null) Values
-*   **`fund_master.csv`:** Found **1 null value** in the `risk_grade` column (for AMFI code `999999` / "Test Missing NAV Fund").
-*   **`investors.csv`:** Found **1 null value** in the `email` column (for Investor `INV004` / "Bharath V").
-*   **`transactions.csv`:** Found **1 null value** in the `units` column (for Transaction `TXN1004` / Investor `INV004`).
+*   **`fund_master.csv`**: There is **1 missing value** in the `risk_grade` column. It belongs to scheme `999999` ("Test Missing NAV Fund"). We should check if we can infer this or if it's just a dummy test record.
+*   **`investors.csv`**: Investor `INV004` ("Bharath V") is **missing an email address**. Since we might need this for communication or unique lookups, we should note it.
+*   **`transactions.csv`**: Transaction `TXN1004` is **missing the `units` value**. Luckily, we have the total transaction `amount` and can impute this by dividing the amount by the NAV value on the transaction date once we join the tables.
 
-### B. Duplicate Rows
-*   **`fund_master.csv`:** Found **1 duplicate row** (AMFI code `125497` / "HDFC Top 100 Fund" exists twice).
-*   **`transactions.csv`:** Found **1 duplicate transaction row** (Transaction `TXN1001` is duplicated).
+### B. Duplicate Records
+*   **`fund_master.csv`**: Found **1 duplicate row** for HDFC Top 100 Fund (`amfi_code`: `125497`). It was written twice in the source.
+*   **`transactions.csv`**: Transaction `TXN1001` was **duplicated** in the list. We need to drop this duplicate so we don't double-count sales or portfolio balances!
 
-### C. Datatype Anomalies
-*   **Date columns loaded as objects (strings):** In `nav_history.csv`, `investors.csv`, `transactions.csv`, and `benchmark_history.csv`, the date columns are read as raw string objects. In Day 2 cleanups, these must be parsed using `pd.to_datetime()` to support sorting and historical queries.
-*   **Mixed Date Formats:** In `nav_history.csv`, one record for scheme `119551` was formatted as `DD/MM/YYYY`, while others were formatted as `YYYY-MM-DD`. This causes inconsistencies during simple string sorting.
-
----
-
-## 6. Fund Master & AMFI Code Architecture
-The exploratory analysis of `fund_master.csv` revealed the following structural details:
-
-### A. Fund Master Dimensions
-*   **Unique Fund Houses (AMCs):** HDFC Mutual Fund, SBI Mutual Fund, ICICI Prudential Mutual Fund, Nippon India Mutual Fund, Axis Mutual Fund, Kotak Mahindra Mutual Fund, PPFAS Mutual Fund, Ghost Mutual Fund.
-*   **Unique Scheme Categories:** Equity, Debt.
-*   **Unique Scheme Sub-Categories:** Large Cap, Mid Cap, Small Cap, Flexi Cap, Liquid.
-*   **Unique Risk Grades:** Very High, High.
-
-### B. AMFI Scheme Code Structure
-The **AMFI Scheme Code** is a standardized 5-to-6 digit numeric string utilized throughout the Indian mutual fund industry:
-1.  **Unique Scheme Identifier:** Acts as a uniform primary key. Since scheme names vary across portals, the numeric AMFI code is critical to ensure accurate scheme identification.
-2.  **Relational Database Key:** Serves as the natural key to join static metadata (scheme details, expense ratios, portfolio allocations) with historical daily transaction and price (NAV) details.
-3.  **Data Ingestion Integration:** A core parameter used in external APIs (e.g. `mfapi.in`) to fetch daily NAV series.
+### C. Data Type and Format Inconsistencies
+*   **Date Fields Read as Strings**: Currently, the date columns in `nav_history.csv`, `investors.csv`, `transactions.csv`, and `benchmark_history.csv` are being read as raw text objects. I'll need to parse these into actual `datetime` objects on Day 2 to allow proper sorting, grouping, and chronological analysis.
+*   **Mixed Date Formats**: In `nav_history.csv`, a record for scheme `119551` was entered in the `DD/MM/YYYY` format, while everything else is in `YYYY-MM-DD`. This breaks basic string-based sorting and will cause date parsing to fail if we don't handle it with a flexible date parser.
 
 ---
 
-## 7. AMFI Code Consistency Validation
-We executed a relational integrity validation matching `fund_master.csv` against `nav_history.csv`:
+## 4. AMFI Code Integrity & Cross-Validation
 
-*   **Total unique AMFI codes in Fund Master:** 11
-*   **Total unique AMFI codes in NAV History:** 11
-*   **Validation Mismatches Detected:**
-    *   **Orphan Master Codes (Missing in NAV History):** Code `999999` ("Test Missing NAV Fund") exists in `fund_master.csv` but has **no matching daily values** in `nav_history.csv`.
-    *   **Orphan History Codes (Missing in Master):** Code `888888` has daily price values in `nav_history.csv` but **no metadata record** in `fund_master.csv`.
+The **AMFI Scheme Code** is the unique 5-to-6 digit number assigned by the Association of Mutual Funds in India. It is our natural key to join the static fund metadata (like risk ratings, fund houses, categories) with price history or transactions.
 
-> [!WARNING]
-> Relational joins executed on these mismatched codes will result in information loss (omitted records during `INNER JOIN` or orphan null entries in `LEFT JOIN`). Cleanups should involve pruning these orphan records or mapping them correctly.
+I ran a relational check between our `fund_master.csv` unique codes and our `nav_history.csv` unique codes. I found two integrity issues:
+1.  **Orphan Master Code**: AMFI Code `999999` ("Test Missing NAV Fund") exists in our fund master metadata but has **no daily price entries** in `nav_history.csv`.
+2.  **Orphan NAV History Code**: AMFI Code `888888` has daily price values inside `nav_history.csv` but **does not exist in `fund_master.csv`**.
+
+If we run a basic `INNER JOIN` in our SQL staging tables later, these records will be silently dropped. If we run a `LEFT JOIN` on `nav_history`, the orphan codes will have null details. Tomorrow, I will write a cleanup routine to decide whether to prune them or populate dummy names for them.
 
 ---
 
-## 8. Live Ingestion Results (`mfapi.in`)
-The live NAV ingestion script `live_nav_fetch.py` successfully completed the download of live data for 6 key schemes:
-1.  **HDFC Top 100 Direct** (125497)
-2.  **SBI Bluechip** (119551)
-3.  **ICICI Bluechip** (120503)
-4.  **Nippon Large Cap** (118632)
-5.  **Axis Bluechip** (119092)
-6.  **Kotak Bluechip** (120841)
+## 5. Live Ingestion Results from API (`mfapi.in`)
 
-All fetched records have been successfully saved as individual raw CSV files in `data/raw/` for downstream aggregation.
+I wrote a small API tool (`live_nav_fetch.py`) to connect to the open API at `https://api.mfapi.in` and grab the live and historical NAV record sets. 
+
+The script was fully successful, fetched all 6 schemes, and saved them as clean, individual CSVs under `data/raw/`:
+*   **HDFC Top 100 Direct** (125497) -> `hdfc_top_100_direct_nav.csv` (3,091 records)
+*   **SBI Bluechip** (119551) -> `sbi_bluechip_nav.csv` (3,236 records)
+*   **ICICI Bluechip** (120503) -> `icici_bluechip_nav.csv` (3,307 records)
+*   **Nippon Large Cap** (118632) -> `nippon_large_cap_nav.csv` (3,298 records)
+*   **Axis Bluechip** (119092) -> `axis_bluechip_nav.csv` (3,565 records)
+*   **Kotak Bluechip** (120841) -> `kotak_bluechip_nav.csv` (3,301 records)
 
 ---
 
-## 9. Downstream Cleanup Plan (Day 2)
-To prepare these ingested datasets for database loading and dashboarding, we will execute the following steps in Day 2:
-1.  **Deduplication:** Drop duplicate records in `fund_master.csv` and `transactions.csv`.
-2.  **Datatype Parsing:** Convert all date string columns to native datetime objects.
-3.  **Null Imputation:** Resolve nulls in `units` by recalculating `amount / NAV` at the transaction date, and populate `risk_grade` using standard subclass references.
-4.  **Relational Alignment:** Align unmatched AMFI codes or prune orphan rows to ensure referential integrity.
+## 6. What's Next (Tomorrow's Cleanup Plan)
+
+To get these files ready for our database and dashboards, my plan for Day 2 is to:
+1.  **Deduplicate**: Clean up the duplicate rows in `fund_master.csv` and `transactions.csv`.
+2.  **Harmonize Dates**: Use a flexible parser to convert all date columns into standard `YYYY-MM-DD` datetime objects, fixing the mixed-format entry in NAV history.
+3.  **Impute Missing Units**: Look up the NAV for Transaction `TXN1004` and calculate the missing unit count programmatically.
+4.  **Align Keys**: Address the orphan codes (`999999` and `888888`) so that our database queries execute cleanly with full referential integrity.
+
+Overall, the setup and ingestion went really well today. The data has a few typical real-world flaws, but they are all very manageable. Let me know if you have any questions or want me to tweak the cleaning plan for tomorrow!
