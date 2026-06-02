@@ -59,7 +59,7 @@ def create_report():
     # Subtitle/Metadata
     meta = doc.add_paragraph()
     meta.paragraph_format.space_after = Pt(24)
-    run_meta = meta.add_run("Mutual Fund Analytics Capstone Project | Day 1 Work Review")
+    run_meta = meta.add_run("Mutual Fund Analytics Capstone Project | Day 1 Work Review (Real Datasets)")
     run_meta.font.size = Pt(10)
     run_meta.font.italic = True
     run_meta.font.color.rgb = SECONDARY_COLOR
@@ -72,9 +72,9 @@ def create_report():
         "datasets ingested, and the live API connection working."
     )
     p = doc.add_paragraph(
-        "I did a deep dive into the 10 CSV files to check for quality issues. There are a few dirty "
-        "spots (duplicates, missing fields, and date format mismatches) that we will need to clean up "
-        "first thing tomorrow. I’ve detailed everything below."
+        "I did a deep dive into the 10 real CSV files to check for quality issues. The datasets are "
+        "practically pristine with no duplicates and excellent relational consistency. There is only "
+        "one minor mathematically expected missing field which we'll address in the cleaning phase."
     )
     
     # Section 1
@@ -87,24 +87,24 @@ def create_report():
     run.font.color.rgb = PRIMARY_COLOR
     
     p = doc.add_paragraph(
-        "I set up the project folder structure inside the directory: "
+        "I verified the project folder structure inside the directory: "
     )
     p.add_run("C:\\Users\\jibum\\OneDrive\\Desktop\\Bluestock Internship").bold = True
     
     p = doc.add_paragraph("Here is the current layout and where we stand:")
     
-    # Bullet points with manual indent
+    # Bullet points
     bp1 = doc.add_paragraph(style='List Bullet')
     bp1.add_run("data/raw/").bold = True
-    bp1.add_run(" - Active. This contains the 10 original local CSV datasets, plus the raw historical CSVs I downloaded from the API.")
+    bp1.add_run(" - Active. Contains the 10 prefixed local CSV datasets, plus the raw historical CSVs downloaded from the API.")
     
     bp2 = doc.add_paragraph(style='List Bullet')
     bp2.add_run("data/processed/").bold = True
-    bp2.add_run(" - Empty. This is intentional! It is currently an empty staging folder. I will be outputting our deduplicated, clean, and merged datasets here during tomorrow's cleaning phase.")
+    bp2.add_run(" - Empty. An empty staging folder. Deduplicated, clean, and merged datasets will be saved here during the Day 2 cleaning phase.")
     
     bp3 = doc.add_paragraph(style='List Bullet')
     bp3.add_run("notebooks/").bold = True
-    bp3.add_run(" - Placeholder. Set up and ready for Jupyter/Google Colab notebooks for explorative analysis.")
+    bp3.add_run(" - Placeholder. Set up and ready for Jupyter notebooks for explorative analysis (EDA).")
     
     bp4 = doc.add_paragraph(style='List Bullet')
     bp4.add_run("sql/").bold = True
@@ -112,22 +112,22 @@ def create_report():
     
     bp5 = doc.add_paragraph(style='List Bullet')
     bp5.add_run("dashboard/").bold = True
-    bp5.add_run(" - Empty. Another intentional placeholder. I'll be using this directory later to store the visual assets, styling sheets, and configuration files for the UI and dashboard widgets.")
+    bp5.add_run(" - Staging. Set up for Power BI visual assets and dashboard files.")
     
     bp6 = doc.add_paragraph(style='List Bullet')
     bp6.add_run("reports/").bold = True
-    bp6.add_run(" - Active. Where I'm saving our documentation, summaries, and data quality reports.")
+    bp6.add_run(" - Active. Where documentation, summaries, and data quality reports are stored.")
     
     # Quick Note
     p_note = doc.add_paragraph()
     p_note.paragraph_format.space_before = Pt(8)
     p_note.add_run("Quick Note on Environment: ").bold = True
     p_note.add_run(
-        "I successfully initialized the local Git repository and set up the remote pointing to our GitHub repository. "
-        "Everything has been committed cleanly under the message \"Day 1: Data ingestion complete\"."
+        "I initialized the local Git repository and set up the remote pointing to our GitHub repository. "
+        "All changes are committed cleanly under \"Day 1: Data ingestion complete\"."
     )
     p_note = doc.add_paragraph(
-        "I also created requirements.txt with all the specific versions we need for the analytical stack (Pandas, NumPy, "
+        "I also created requirements.txt with all dependencies for the analytical stack (Pandas, NumPy, "
         "Matplotlib, Seaborn, Plotly, SQLAlchemy, Requests, SciPy, and Jupyter)."
     )
     
@@ -141,23 +141,23 @@ def create_report():
     run.font.color.rgb = PRIMARY_COLOR
     
     p = doc.add_paragraph(
-        "I wrote an ETL script (data_ingestion.py) to systematically load and inspect all 10 source CSV files using Pandas. "
+        "I updated the ETL script (data_ingestion.py) to systematically load and inspect all 10 real source CSV files using Pandas. "
         "Here is the exact profile of the data as it stands:"
     )
     
     # Table Creation
     headers = ["Dataset File Name", "Shape", "Target Primary Key", "Main Column Dtypes", "Quality Status"]
     data = [
-        ["fund_master.csv", "12 x 6", "amfi_code", "int64, object (string)", "Dirty (Nulls & Duplicates)"],
-        ["nav_history.csv", "101 x 3", "amfi_code + date", "int64, object (string), float64", "Dirty (Mixed date formats)"],
-        ["investors.csv", "5 x 5", "investor_id", "object, object (string)", "Dirty (Has nulls)"],
-        ["transactions.csv", "6 x 7", "transaction_id", "object, int64, float64", "Dirty (Nulls & Duplicates)"],
-        ["fund_managers.csv", "4 x 4", "manager_id", "object, int64, object", "Clean"],
-        ["portfolio_holdings.csv", "5 x 5", "holding_id", "object, int64, float64", "Clean"],
-        ["amc_details.csv", "4 x 5", "amc_id", "object, int64, int64", "Clean"],
-        ["expense_ratios.csv", "4 x 4", "amfi_code", "int64, float64, float64", "Clean"],
-        ["benchmarks.csv", "4 x 3", "benchmark_id", "object, object, object", "Clean"],
-        ["benchmark_history.csv", "20 x 3", "benchmark_id + date", "object, object, float64", "Clean"]
+        ["01_fund_master.csv", "40 x 15", "amfi_code", "int64, object (string)", "Clean"],
+        ["02_nav_history.csv", "46,000 x 3", "amfi_code + date", "int64, object (string), float64", "Clean"],
+        ["03_aum_by_fund_house.csv", "90 x 5", "date + fund_house", "object, float64, int64", "Clean"],
+        ["04_monthly_sip_inflows.csv", "48 x 6", "month", "object, int64, float64", "Minor Anomaly"],
+        ["05_category_inflows.csv", "144 x 3", "month + category", "object, float64", "Clean"],
+        ["06_industry_folio_count.csv", "21 x 6", "month", "object, float64", "Clean"],
+        ["07_scheme_performance.csv", "40 x 19", "amfi_code", "int64, object, float64", "Clean"],
+        ["08_investor_transactions.csv", "32,778 x 13", "investor_id + date", "object, int64, float64", "Clean"],
+        ["09_portfolio_holdings.csv", "322 x 8", "amfi_code + stock", "int64, object, float64", "Clean"],
+        ["10_benchmark_indices.csv", "8,050 x 3", "date + index_name", "object, float64", "Clean"]
     ]
     
     table = doc.add_table(rows=1 + len(data), cols=5)
@@ -184,7 +184,7 @@ def create_report():
             set_cell_margins(row_cells[c_idx], 80, 80, 150, 150)
             run = row_cells[c_idx].paragraphs[0].runs[0]
             run.font.size = Pt(9.5)
-            if "Dirty" in text:
+            if "Minor Anomaly" in text:
                 run.font.bold = True
                 run.font.color.rgb = ACCENT_WARN
             elif "Clean" in text:
@@ -194,14 +194,13 @@ def create_report():
     h3 = doc.add_paragraph()
     h3.paragraph_format.space_before = Pt(24)
     h3.paragraph_format.space_after = Pt(6)
-    run = h3.add_run("3. Data Quality & Anomalies Breakdown (The \"Dirty\" List)")
+    run = h3.add_run("3. Data Quality & Anomalies Breakdown")
     run.font.size = Pt(14)
     run.font.bold = True
     run.font.color.rgb = PRIMARY_COLOR
     
     p = doc.add_paragraph(
-        "While profiling the files, I detected several anomalies that will cause issues down the road if we don't fix them. "
-        "Here is exactly what I found:"
+        "While profiling the real-world files, the datasets were found to be very high-quality. Here is the anomalies breakdown:"
     )
     
     # Sub-heading 3.A
@@ -214,22 +213,10 @@ def create_report():
     run.font.color.rgb = SECONDARY_COLOR
     
     bp1 = doc.add_paragraph(style='List Bullet')
-    bp1.add_run("fund_master.csv: ").bold = True
-    bp1.add_run("There is ")
-    bp1.add_run("1 missing value").bold = True
-    bp1.add_run(" in the risk_grade column. It belongs to scheme 999999 (\"Test Missing NAV Fund\"). We should check if we can infer this or if it's just a dummy test record.")
-    
-    bp2 = doc.add_paragraph(style='List Bullet')
-    bp2.add_run("investors.csv: ").bold = True
-    bp2.add_run("Investor INV004 (\"Bharath V\") is ")
-    bp2.add_run("missing an email address").bold = True
-    bp2.add_run(". Since we might need this for communication or unique lookups, we should note it.")
-    
-    bp3 = doc.add_paragraph(style='List Bullet')
-    bp3.add_run("transactions.csv: ").bold = True
-    bp3.add_run("Transaction TXN1004 is ")
-    bp3.add_run("missing the units value").bold = True
-    bp3.add_run(". Luckily, we have the total transaction amount and can impute this by dividing the amount by the NAV value on the transaction date once we join the tables.")
+    bp1.add_run("04_monthly_sip_inflows.csv: ").bold = True
+    bp1.add_run("Contains ")
+    bp1.add_run("12 null values").bold = True
+    bp1.add_run(" in the yoy_growth_pct column. This is a mathematically expected anomaly because YoY growth calculations require previous year's baseline data which is unavailable for 2022.")
     
     # Sub-heading 3.B
     h3b = doc.add_paragraph()
@@ -241,33 +228,21 @@ def create_report():
     run.font.color.rgb = SECONDARY_COLOR
     
     bp1 = doc.add_paragraph(style='List Bullet')
-    bp1.add_run("fund_master.csv: ").bold = True
-    bp1.add_run("Found ")
-    bp1.add_run("1 duplicate row").bold = True
-    bp1.add_run(" for HDFC Top 100 Fund (amfi_code: 125497). It was written twice in the source.")
-    
-    bp2 = doc.add_paragraph(style='List Bullet')
-    bp2.add_run("transactions.csv: ").bold = True
-    bp2.add_run("Transaction TXN1001 was ")
-    bp2.add_run("duplicated").bold = True
-    bp2.add_run(" in the list. We need to drop this duplicate so we don't double-count sales or portfolio balances!")
+    bp1.add_run("All CSV Files: ").bold = True
+    bp1.add_run("No duplicate rows were found in any of the 10 real-world datasets. Relational key boundaries are completely unique.")
     
     # Sub-heading 3.C
     h3c = doc.add_paragraph()
     h3c.paragraph_format.space_before = Pt(12)
     h3c.paragraph_format.space_after = Pt(4)
-    run = h3c.add_run("C. Data Type and Format Inconsistencies")
+    run = h3c.add_run("C. Portfolio Holdings representation")
     run.font.size = Pt(12)
     run.font.bold = True
     run.font.color.rgb = SECONDARY_COLOR
     
     bp1 = doc.add_paragraph(style='List Bullet')
-    bp1.add_run("Date Fields Read as Strings: ").bold = True
-    bp1.add_run("Currently, the date columns in nav_history.csv, investors.csv, transactions.csv, and benchmark_history.csv are being read as raw text objects. I'll need to parse these into actual datetime objects on Day 2 to allow proper sorting, grouping, and chronological analysis.")
-    
-    bp2 = doc.add_paragraph(style='List Bullet')
-    bp2.add_run("Mixed Date Formats: ").bold = True
-    bp2.add_run("In nav_history.csv, a record for scheme 119551 was entered in the DD/MM/YYYY format, while everything else is in YYYY-MM-DD. This breaks basic string-based sorting and will cause date parsing to fail if we don't handle it with a flexible date parser.")
+    bp1.add_run("09_portfolio_holdings.csv: ").bold = True
+    bp1.add_run("Only 34 unique AMFI codes are present (out of the 40). This is accurate as portfolio equity weights are only tracked for equity and index schemes, and naturally exclude the 6 debt/liquid schemes.")
     
     # Section 4
     h4 = doc.add_paragraph()
@@ -279,44 +254,35 @@ def create_report():
     run.font.color.rgb = PRIMARY_COLOR
     
     p = doc.add_paragraph(
-        "The AMFI Scheme Code is the unique 5-to-6 digit number assigned by the Association of Mutual Funds in India. "
-        "It is our natural key to join the static fund metadata (like risk ratings, fund houses, categories) with price history or transactions."
-    )
-    p = doc.add_paragraph(
-        "I ran a relational check between our fund_master.csv unique codes and our nav_history.csv unique codes. I found two integrity issues:"
+        "The AMFI Scheme Code is our natural key to join static metadata with prices or transactions. "
+        "I ran a relational consistency check between 01_fund_master.csv and 02_nav_history.csv:"
     )
     
     bp1 = doc.add_paragraph(style='List Bullet')
-    bp1.add_run("Orphan Master Code: ").bold = True
-    bp1.add_run("AMFI Code 999999 (\"Test Missing NAV Fund\") exists in our fund master metadata but has ")
-    bp1.add_run("no daily price entries").bold = True
-    bp1.add_run(" in nav_history.csv.")
+    bp1.add_run("Unique Master Codes: ").bold = True
+    bp1.add_run("40 unique scheme codes detected.")
     
     bp2 = doc.add_paragraph(style='List Bullet')
-    bp2.add_run("Orphan NAV History Code: ").bold = True
-    bp2.add_run("AMFI Code 888888 has daily price values inside nav_history.csv but ")
-    bp2.add_run("does not exist in fund_master.csv").bold = True
-    bp2.add_run(".")
+    bp2.add_run("Unique NAV Codes: ").bold = True
+    bp2.add_run("40 unique scheme codes detected.")
     
-    # Warning Callout Box using Table
+    # Success Callout Box using Table
     callout = doc.add_table(rows=1, cols=1)
     callout.style = 'Table Grid'
     cell = callout.rows[0].cells[0]
-    set_cell_background(cell, "FDF2E9") # Soft Amber/Peach background
+    set_cell_background(cell, "E8F8F5") # Soft Teal background
     set_cell_margins(cell, 150, 150, 200, 200)
     
-    # Rust Red border on left (simulate in text since direct borders can be verbose in docx XML)
     p_c = cell.paragraphs[0]
     p_c.paragraph_format.space_after = Pt(0)
-    run_c_title = p_c.add_run("WARNING ON REFERENCE INTEGRITY:\n")
+    run_c_title = p_c.add_run("SUCCESS ON RELATIONSHIPS:\n")
     run_c_title.font.bold = True
-    run_c_title.font.color.rgb = ACCENT_WARN
+    run_c_title.font.color.rgb = RGBColor(46, 125, 50)
     run_c_title.font.size = Pt(10.5)
     
     run_c_text = p_c.add_run(
-        "If we run a basic INNER JOIN in our SQL staging tables later, these records will be silently dropped. "
-        "If we run a LEFT JOIN on nav_history, the orphan codes will have null details. "
-        "Tomorrow, I will write a cleanup routine to decide whether to prune them or populate dummy names for them."
+        "Relational integrity check shows 100% SUCCESS. Every single AMFI code listed in the master file has "
+        "associated historical prices in the daily NAV history, and there are no orphan codes. This ensures a clean star schema."
     )
     run_c_text.font.size = Pt(10)
     
@@ -334,39 +300,39 @@ def create_report():
     run.font.color.rgb = PRIMARY_COLOR
     
     p = doc.add_paragraph(
-        "I wrote a small API tool (live_nav_fetch.py) to connect to the open API at https://api.mfapi.in and grab the live and historical NAV record sets. "
-        "The script was fully successful, fetched all 6 schemes, and saved them as clean, individual CSVs under data/raw/:"
+        "I ran the API tool (live_nav_fetch.py) to connect to the open API at https://api.mfapi.in and grab live NAV records. "
+        "The script succeeded with 100% retrieval rate and saved CSV files under data/raw/:"
     )
     
     bp1 = doc.add_paragraph(style='List Bullet')
     bp1.add_run("HDFC Top 100 Direct (125497)").bold = True
-    bp1.add_run(" -> hdfc_top_100_direct_nav.csv (3,091 records)")
+    bp1.add_run(" -> hdfc_top_100_direct_nav.csv (3,091 daily rows)")
     
     bp2 = doc.add_paragraph(style='List Bullet')
     bp2.add_run("SBI Bluechip (119551)").bold = True
-    bp2.add_run(" -> sbi_bluechip_nav.csv (3,236 records)")
+    bp2.add_run(" -> sbi_bluechip_nav.csv (3,236 daily rows)")
     
     bp3 = doc.add_paragraph(style='List Bullet')
-    bp3.add_run("ICICI Bluechip (120503)").bold = True
-    bp3.add_run(" -> icici_bluechip_nav.csv (3,307 records)")
+    bp3.add_run("ICICI Prudential Bluechip (120503)").bold = True
+    bp3.add_run(" -> icici_bluechip_nav.csv (3,307 daily rows)")
     
     bp4 = doc.add_paragraph(style='List Bullet')
-    bp4.add_run("Nippon Large Cap (118632)").bold = True
-    bp4.add_run(" -> nippon_large_cap_nav.csv (3,298 records)")
+    bp4.add_run("Nippon India Large Cap (118632)").bold = True
+    bp4.add_run(" -> nippon_large_cap_nav.csv (3,298 daily rows)")
     
     bp5 = doc.add_paragraph(style='List Bullet')
     bp5.add_run("Axis Bluechip (119092)").bold = True
-    bp5.add_run(" -> axis_bluechip_nav.csv (3,565 records)")
+    bp5.add_run(" -> axis_bluechip_nav.csv (3,565 daily rows)")
     
     bp6 = doc.add_paragraph(style='List Bullet')
     bp6.add_run("Kotak Bluechip (120841)").bold = True
-    bp6.add_run(" -> kotak_bluechip_nav.csv (3,301 records)")
+    bp6.add_run(" -> kotak_bluechip_nav.csv (3,301 daily rows)")
     
     # Section 6
     h6 = doc.add_paragraph()
     h6.paragraph_format.space_before = Pt(18)
     h6.paragraph_format.space_after = Pt(6)
-    run = h6.add_run("6. What's Next (Tomorrow's Cleanup Plan)")
+    run = h6.add_run("6. What's Next (Day 2 Plans)")
     run.font.size = Pt(14)
     run.font.bold = True
     run.font.color.rgb = PRIMARY_COLOR
@@ -376,24 +342,24 @@ def create_report():
     )
     
     bp1 = doc.add_paragraph(style='List Bullet')
-    bp1.add_run("Deduplicate: ").bold = True
-    bp1.add_run("Clean up the duplicate rows in fund_master.csv and transactions.csv.")
+    bp1.add_run("Harmonize Dates: ").bold = True
+    bp1.add_run("Ensure all date fields across datasets are parsed into standard YYYY-MM-DD format.")
     
     bp2 = doc.add_paragraph(style='List Bullet')
-    bp2.add_run("Harmonize Dates: ").bold = True
-    bp2.add_run("Use a flexible parser to convert all date columns into standard YYYY-MM-DD datetime objects, fixing the mixed-format entry in NAV history.")
+    bp2.add_run("SQLite Relational Design: ").bold = True
+    bp2.add_run("Write DDL statements in sql/schema.sql to set up a normalized star schema in SQLite (bluestock_mf.db).")
     
     bp3 = doc.add_paragraph(style='List Bullet')
-    bp3.add_run("Impute Missing Units: ").bold = True
-    bp3.add_run("Look up the NAV for Transaction TXN1004 and calculate the missing unit count programmatically.")
+    bp3.add_run("Load Data via SQLAlchemy: ").bold = True
+    bp3.add_run("Implement an automated load step in Python to populate all 10 datasets into the SQLite database.")
     
     bp4 = doc.add_paragraph(style='List Bullet')
-    bp4.add_run("Align Keys: ").bold = True
-    bp4.add_run("Address the orphan codes (999999 and 888888) so that our database queries execute cleanly with full referential integrity.")
+    bp4.add_run("Analytical SQL Verification: ").bold = True
+    bp4.add_run("Run the 10 core analytics queries to verify relations and calculations, saving SQL queries in sql/queries.sql.")
     
     p = doc.add_paragraph(
-        "Overall, the setup and ingestion went really well today. The data has a few typical real-world flaws, but they are all very manageable. "
-        "Let me know if you have any questions or want me to tweak the cleaning plan for tomorrow!"
+        "Overall, the setup and ingestion went really well today. The provided datasets are very clean and robust. "
+        "Let me know if you have any questions or want me to proceed with Day 2 database design!"
     )
     
     # Save Document
@@ -403,3 +369,4 @@ def create_report():
 
 if __name__ == "__main__":
     create_report()
+
