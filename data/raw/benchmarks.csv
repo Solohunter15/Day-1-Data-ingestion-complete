@@ -1,0 +1,5 @@
+benchmark_id,benchmark_name,index_type
+BM01,NIFTY 50,Large Cap
+BM02,NIFTY Next 50,Large Cap
+BM03,NIFTY Midcap 150,Mid Cap
+BM04,NIFTY Smallcap 250,Small Cap

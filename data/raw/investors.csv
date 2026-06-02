@@ -1,0 +1,6 @@
+investor_id,name,email,risk_profile,joined_date
+INV001,Jibu Mathew,jibu@example.com,Aggressive,2024-01-15
+INV002,Anurag Kaushik,anurag@example.com,Moderate,2024-02-10
+INV003,Anshuman Maity,anshuman@example.com,Conservative,2024-03-01
+INV004,Bharath V,,Aggressive,2024-03-12
+INV005,Sarah Smith,sarah@example.com,Moderate,2024-04-05
