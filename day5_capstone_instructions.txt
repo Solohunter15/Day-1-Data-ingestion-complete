@@ -1,0 +1,1232 @@
+BLUESTOCK
+ FINTECH
+ Capstone Project
+ Mutual Fund Analytics Platform
+ End-to-End Data Engineering, ETL Pipeline & Interactive Dashboard
+Company
+Bluestock Fintech Pvt. Ltd.
+Domain
+Mutual Fund / Fintech
+Project Type
+Individual Capstone (1 Week)
+Duration
+7 Working Days  |  ~50-55 Hours
+Data Source
+AMFI India (Public), mfapi.in, NSE/BSE Public Data
+Technologies
+Python, SQL, Power BI / Tableau, Pandas, Matplotlib
+Submission
+PDF Report + Dashboard + GitHub Repository
+Prepared By
+Intern / Data Analyst — Bluestock Fintech
+Date
+June 2026
+ 40 Schemes
+ Real Fund Schemes
+ 10 Datasets
+ Provided
+ 87K+ Rows
+ Transaction Data
+ 4.5 Yrs
+ NAV History
+All data in this project is sourced from publicly available information published by AMFI India, NSE, BSE and open APIs (mfapi.in). This project
+ is for educational purposes only and does not constitute financial advice. Mutual Fund investments are subject to market risks.
+Table of Contents
+1. Project Overview & Objective ......................... 3
+2. Problem Statement .................................... 4
+3. Data Sources & Datasets .............................. 5
+4. System Architecture & ETL Pipeline ................... 7
+5. 7-Day Task Breakdown ................................. 9
+Day 1 Project Setup + Data Ingestion (ETL) ............ 9
+Day 2 Data Cleaning + SQL Database Design ............. 11
+Day 3 Exploratory Data Analysis (EDA) ................. 13
+Day 4 Fund Performance Analytics ...................... 15
+Day 5 Dashboard Development (Power BI / Tableau) ...... 17
+Day 6 Advanced Analytics + Risk Metrics ............... 19
+Day 7 Final Report + Presentation + Deployment ........ 21
+6. Technical Stack Details .............................. 23
+7. Deliverables & Evaluation Rubric ..................... 24
+8. Appendix: Dataset Schema Reference ................... 25
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 2 of 21
+1. Project Overview & Objective
+Bluestock Fintech is a financial technology company focused on democratising investment analytics for retail
+and institutional investors in India. This capstone project tasks you with building a full-stack Mutual Fund
+Analytics Platform that ingests publicly available data from AMFI India, transforms it through a robust ETL
+pipeline, stores it in a relational database, and presents insights via an interactive dashboard.
+1.1 Business Context
+The Indian mutual fund industry has grown at a remarkable pace. As of December 2025, the industry manages
+over Rs. 81 lakh crore in AUM across 1,908 schemes and 26.12 crore investor folios. Monthly SIP inflows
+crossed an all-time high of Rs. 31,002 crore in December 2025, reflecting India's deepening equity culture.
+Bluestock Fintech wants a data platform that:
+ Tracks NAV movements of 40+ key mutual fund schemes from top AMCs
+ Monitors AUM growth trends for the 10 largest fund houses over 4+ years
+ Analyses investor behaviour patterns across geographies and demographics
+ Computes risk-adjusted return metrics (Sharpe, Sortino, Alpha, Beta)
+ Benchmarks fund performance against Nifty 50, Nifty 100, BSE SmallCap indices
+ Provides an executive-level interactive dashboard for fund selection
+1.2 Project Objectives
+#
+Objective
+Outcome
+O1
+Build an ETL pipeline from raw AMFI data
+Automated Python script
+O2
+Design a normalised SQL schema for MF data
+5-table star schema
+O3
+Perform comprehensive EDA on NAV & AUM data
+EDA notebook with charts
+O4
+Compute performance & risk metrics per scheme
+Metrics dashboard
+O5
+Build an interactive BI dashboard
+Power BI / Tableau file
+O6
+Analyse investor transaction patterns
+Demographic insights
+O7
+Compare fund returns vs benchmark indices
+Alpha / tracking error report
+O8
+Document and present the entire project
+PDF report + slides
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 3 of 21
+2. Problem Statement
+Despite the massive growth of India's mutual fund industry, individual investors and financial advisors often
+struggle to make data-driven fund selection decisions due to fragmented data, lack of unified analytics
+platforms, and complex financial metrics. This project solves real business problems:
+P1: Data Fragmentation
+Problem
+NAV data, AUM data, SIP flow data and portfolio holdings are available on different
+sections of the AMFI website in different formats (TXT, PDF, HTML tables). No single
+unified database exists.
+Solution
+Build an ETL pipeline that consolidates all data into a single SQLite/PostgreSQL
+database.
+P2: Performance Comparison Gap
+Problem
+Investors cannot easily compare multiple funds across different AMCs on a risk-adjusted
+basis. Raw NAV data requires significant transformation to compute Sharpe ratio, Alpha,
+Beta, etc.
+Solution
+Compute and visualise all key risk-return metrics in a single dashboard.
+P3: No Benchmark Tracking
+Problem
+Most retail investors do not know whether their fund is outperforming its benchmark index.
+Tracking error and information ratio require both NAV and benchmark index data.
+Solution
+Join NAV data with benchmark index prices and compute rolling alpha and tracking
+error.
+P4: Investor Behaviour Blind Spot
+Problem
+AMCs and distributors have limited visibility into how demographic and geographic factors
+influence SIP amounts, fund preferences and redemption patterns.
+Solution
+Analyse investor transaction data to generate demographic segmentation and
+behavioural insights.
+P5: Slow Reporting
+Problem
+Monthly MF reports are static PDFs that take days to prepare. Stakeholders need live,
+self-service dashboards with drill-down capability.
+Solution
+Build a Power BI / Tableau dashboard refreshable from the ETL pipeline output.
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 4 of 21
+3. Data Sources & Datasets
+All datasets used in this project are derived from publicly available, freely accessible sources. No proprietary
+or confidential data is used. The primary sources are:
+Source
+URL / API
+Data Type
+Update Freq.
+AMFI India
+www.amfiindia.com
+NAV, AUM, Folio, SIP
+Daily / Monthly
+mfapi.in
+api.mfapi.in/mf/{code}
+Historical NAV (JSON)
+Daily
+mfdata.in
+mfdata.in/api/v1/schemes/
+NAV + Expense Ratio
+Daily
+NSE India
+nseindia.com/reports
+Benchmark Index Prices
+Daily
+BSE India
+bseindia.com
+BSE SmallCap Index
+Daily
+AMFI Monthly Notes
+amfiindia.com/research
+Industry SIP & Flow Data
+Monthly
+3.1 Dataset Inventory
+01_fund_master.csv
+40 rows
+Master list of 40 real mutual fund schemes (AMFI codes, fund house, category, expense ratio,
+risk grade, fund manager)
+02_nav_history.csv
+~46,000 rows
+Daily NAV for all 40 schemes from Jan 2022 to May 2026, anchored to real AMFI NAV values
+from mfapi.in
+03_aum_by_fund_house.csv
+~90 rows
+Quarterly AUM (in Rs. crore) for 10 fund houses from 2022 to 2025, sourced from real AMFI
+quarterly reports
+04_monthly_sip_inflows.csv
+48 rows
+Month-wise SIP inflow (Rs. crore), active SIP accounts, new registrations and SIP AUM — real
+AMFI Monthly Note data
+05_category_inflows.csv
+~144 rows
+Net inflows by fund category (Large Cap, Mid Cap, Small Cap, ELSS, Liquid, etc.) for FY
+2024-25
+06_industry_folio_count.csv
+21 rows
+Total mutual fund folios (in crore) broken by Equity, Debt, Hybrid — real AMFI published
+milestones
+07_scheme_performance.csv
+40 rows
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 5 of 21
+1yr/3yr/5yr returns, Sharpe, Sortino, Alpha, Beta, Max Drawdown, Std Dev — computed from
+NAV history
+08_investor_transactions.csv
+~32,000 rows
+Simulated SIP + Lumpsum + Redemption transactions for 5,000 investors across Indian states
+with demographics
+09_portfolio_holdings.csv
+~320 rows
+Top equity holdings (stock, weight %, sector) for equity mutual funds as of Dec 2025
+10_benchmark_indices.csv
+~8,000 rows
+Daily closing values for Nifty 50, Nifty 100, Nifty Midcap 150, BSE SmallCap, CRISIL Liquid &
+Gilt indices
+3.2 Key Real-World Data Points Embedded
+Metric
+Value
+Source
+SBI MF AUM Dec 2025
+Rs. 12.50 lakh crore (largest AMC in India)
+AMFI Quarterly
+ICICI Pru MF AUM Dec 2025
+Rs. 10.74 lakh crore
+AMFI Quarterly
+HDFC MF AUM Dec 2025
+Rs. 9.30 lakh crore
+AMFI Quarterly
+SIP Inflow Dec 2025
+Rs. 31,002 crore (all-time high at time of project)
+AMFI Monthly Note
+Active SIP Accounts Dec 2025
+9.35 crore accounts
+AMFI Monthly Note
+Total MF Folios Dec 2025
+26.12 crore
+AMFI / Business Standard
+Industry AUM Dec 2025
+Rs. 81 lakh crore (Oct 2025 peak: Rs. 79.9 lakh crore)
+AMFI
+NAV anchor: HDFC Top 100
+Rs. 892.45 (Oct 2024) — from mfapi.in code 125497
+mfapi.in
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 6 of 21
+4. System Architecture & ETL Pipeline
+The project follows a classic data engineering architecture: Extract → Transform → Load → Analyse →
+Visualise. This mirrors real-world fintech data pipelines used at companies like Zerodha, Groww, and Paytm
+Money.
+LAYER 1: DATA SOURCES (Extract)
+■ AMFI Daily NAV TXT (amfiindia.com/spages/NAVAll.txt)
+■ AMFI Historical NAV API (portal.amfiindia.com/DownloadNAVHistoryReport_Po.aspx)
+■ mfapi.in REST API (GET /mf/{scheme_code} — JSON, no auth required)
+■ AMFI Monthly Notes PDF (amfiindia.com/research-information/amfi-monthly)
+■ NSE/BSE Bhavcopy CSV (nseindia.com/reports)
+■ Pre-packaged CSV datasets provided with this project
+LAYER 2: DATA PROCESSING (Transform)
+■ Python (Pandas) — parse, clean, reshape, merge datasets
+■ Handle missing NAV values (weekends/holidays → forward-fill)
+■ Compute derived fields: daily returns, rolling averages, CAGR
+■ Normalise fund names (AMFI naming inconsistencies)
+■ Validate AMFI codes against master list
+■ Enrich transactions with fund metadata (join on amfi_code)
+LAYER 3: DATA STORAGE (Load)
+■ SQLite (development) or PostgreSQL (production)
+■ 5-table star schema: dim_fund, dim_date, fact_nav, fact_transactions, fact_performance
+■ Indexed on amfi_code, date for fast query performance
+■ CSV flat-file backup for Tableau / Power BI direct import
+LAYER 4: ANALYTICS (Analyse)
+■ Jupyter Notebooks for EDA (Matplotlib, Seaborn, Plotly)
+■ Risk metrics: Sharpe, Sortino, Alpha, Beta, Max Drawdown, VaR
+■ Benchmark comparison: rolling 3-month alpha vs Nifty 100
+■ Cohort analysis: investor tenure vs average SIP amount
+■ Geographic heatmap: T30 vs B30 city AUM contribution
+LAYER 5: VISUALISATION (Dashboard)
+■ Power BI / Tableau Desktop dashboard
+■ 4 report pages: Fund Overview, Performance, Investor, Industry Trends
+■ Slicers: Fund House, Category, Date Range, State
+■ KPI cards: AUM, SIP Inflow, Folio Count, Top Performer
+■ Export to PDF for stakeholder distribution
+4.1 Database Schema (Star Schema)
+Table
+Type
+Key Columns
+Rows (approx.)
+dim_fund
+Dimension
+amfi_code (PK), fund_house, category, expense_ratio
+40
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 7 of 21
+dim_date
+Dimension
+date_id (PK), date, year, month, quarter, is_weekday
+1,500
+fact_nav
+Fact
+amfi_code (FK), date (FK), nav, daily_return_pct
+46,000
+fact_transactions
+Fact
+tx_id (PK), investor_id, amfi_code (FK), date, amount, type
+32,000+
+fact_performance
+Fact
+amfi_code (FK), as_of_date, return_1yr, sharpe, alpha, max_dd
+40
+fact_portfolio
+Fact
+amfi_code (FK), stock_symbol, weight_pct, sector, date
+320
+fact_aum
+Fact
+fund_house, date, aum_crore, num_schemes
+90
+fact_sip_industry
+Fact
+month, sip_inflow_crore, sip_accounts_crore
+48
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 8 of 21
+5. 7-Day Task Breakdown
+This project is designed to be completed individually in 7 working days (~50–55 hours). Each day has a clear
+focus area, specific tasks, required tools, and concrete deliverables. Days 1-2 are foundational (data
+engineering), Days 3-4 are analytical, Days 5-6 are visualisation/advanced analytics, and Day 7 is
+documentation and presentation.
+DAY 1: Project Setup + Data Ingestion (ETL)
+ Week Day 1 | 6–8 hours
+Objectives
+ Set up the project environment (Python, VS Code / Jupyter, Git)
+ Understand the AMFI data ecosystem and public APIs
+ Write Python scripts to ingest all 10 provided CSV datasets
+ Fetch live NAV data from mfapi.in API for 5 selected schemes
+ Create a Git repository and commit the initial project structure
+ #
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 1
+Create project folder structure:
+project/ ■■■ data/raw/ ■■■
+data/processed/ ■■■ notebooks/
+■■■ sql/ ■■■ dashboard/ ■■■
+reports/
+VS Code, Git
+Folder structure committed to
+GitHub
+ 30m
+ 2
+Install dependencies: pip install
+pandas numpy matplotlib seaborn
+plotly sqlalchemy sqlite3 requests
+jupyter
+pip, requirements.txt
+requirements.txt file
+ 20m
+ 3
+Load all 10 CSV datasets using
+pandas, print shape/dtypes/head for
+each
+Python, Pandas
+data_ingestion.py script
+ 60m
+ 4
+Fetch live NAV from mfapi.in: GET
+https://api.mfapi.in/mf/125497 (HDFC
+Top 100) Parse JSON response and
+save as raw CSV
+requests, json,
+Pandas
+live_nav_fetch.py + raw CSV
+ 45m
+ 5
+Fetch NAV for 5 schemes: SBI
+Bluechip (119551), ICICI Bluechip
+(120503), Nippon Large Cap
+(118632), Axis Bluechip (119092),
+Kotak Bluechip (120841)
+mfapi.in REST API
+5 raw NAV CSV files
+ 60m
+ 6
+Understand fund master: print unique
+fund houses, categories,
+sub-categories, risk grades
+Pandas, Jupyter
+EDA cell outputs in notebook
+ 30m
+ 7
+Validate AMFI codes — check all
+codes in fund_master exist in
+nav_history
+Pandas merge/join
+Data quality report (text)
+ 20m
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 9 of 21
+#
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 8
+Git commit with message: 'Day 1:
+Data ingestion complete'
+Git, GitHub
+Remote repository updated
+ 10m
+Day 1 Deliverables: Project repo, data_ingestion.py, live_nav_fetch.py, 15 raw CSV files in data/raw/
+DAY 2: Data Cleaning + SQL Database Design
+ Week Day 2 | 7–8 hours
+Objectives
+ Clean and validate all 10 datasets (handle nulls, duplicates, type errors)
+ Design and implement a 5+ table SQLite database schema
+ Load all cleaned data into the database
+ Write and test 10 SQL queries for basic analytics
+ #
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 1
+Clean nav_history.csv: - Parse dates
+to datetime - Sort by amfi_code + date
+- Forward-fill missing NAV (holidays) -
+Remove duplicates - Validate NAV >
+0
+Pandas, datetime
+clean_nav.csv (46K rows)
+ 75m
+ 2
+Clean investor_transactions.csv: -
+Standardise transaction_type
+(SIP/Lumpsum/Redemption) -
+Validate amount > 0 - Check KYC
+status values - Fix date formats
+Pandas, re
+clean_transactions.csv
+ 60m
+ 3
+Clean scheme_performance.csv: -
+Validate return values are numeric -
+Flag negative Sharpe ratios - Check
+expense_ratio range (0.1% – 2.5%)
+Pandas, numpy
+clean_performance.csv
+ 30m
+ 4
+Design SQLite schema: CREATE
+TABLE dim_fund (amfi_code TEXT
+PK, fund_house, scheme_name,
+category, ...) CREATE TABLE
+fact_nav (amfi_code TEXT FK,
+nav_date DATE, nav REAL,
+daily_return REAL) CREATE TABLE
+fact_transactions (...) CREATE
+TABLE fact_performance (...)
+SQLite, SQL DDL
+schema.sql file
+ 60m
+ 5
+Load all cleaned datasets into SQLite:
+engine = create_engine('sqlite:///blues
+tock_mf.db') df.to_sql('fact_nav',
+engine, ...)
+SQLAlchemy, SQLite
+bluestock_mf.db (database file)
+ 45m
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 10 of 21
+#
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 6
+Write 10 SQL queries: 1. Top 5 funds
+by AUM 2. Average NAV per month 3.
+SIP inflow YoY growth 4.
+Transactions by state 5. Funds with
+expense_ratio < 1% 6-10: (see
+notebook)
+SQL, SQLite CLI
+queries.sql with results
+ 60m
+ 7
+Create data dictionary documenting
+all columns, types, and sources
+Markdown/Excel
+data_dictionary.md
+ 30m
+ 8
+Git commit: 'Day 2: Cleaned data +
+SQLite DB loaded'
+Git
+GitHub updated
+ 10m
+Day 2 Deliverables: 10 clean CSVs, bluestock_mf.db, schema.sql, queries.sql, data_dictionary.md
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 11 of 21
+DAY 3: Exploratory Data Analysis (EDA)
+ Week Day 3 | 7–8 hours
+Objectives
+ Perform deep EDA on NAV, AUM, SIP and investor data
+ Create 15+ publication-quality charts using Matplotlib/Seaborn/Plotly
+ Identify key trends, anomalies and insights
+ Document findings in a structured Jupyter Notebook
+ #
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 1
+NAV trend analysis: Plot daily NAV for
+all 40 schemes 2022–2026. Highlight
+COVID recovery, 2023 rally, 2024
+corrections.
+Matplotlib, Plotly
+Chart: NAV Trend Lines
+ 60m
+ 2
+AUM growth bar chart: Grouped bar
+chart — AUM by fund house for each
+year 2022–2025. Highlight SBI's
+dominance at Rs.12.5L Cr.
+Seaborn barplot
+Chart: AUM Growth by AMC
+ 45m
+ 3
+SIP inflow time-series: Monthly SIP
+inflow Jan 2022 to Dec 2025. Mark
+the Rs.31,002 Cr milestone (Dec
+2025).
+Plotly line chart
+Chart: SIP Inflow Trend
+ 30m
+ 4
+Category-wise inflow heatmap:
+Months on X-axis, categories on
+Y-axis, net inflow as colour intensity.
+Seaborn heatmap
+Chart: Category Heatmap
+ 45m
+ 5
+Investor demographics: Age group
+distribution pie chart. SIP amount box
+plot by age group.
+Matplotlib, Seaborn
+2 Charts: Demographics
+ 45m
+ 6
+Geographic distribution: Horizontal
+bar chart — SIP amount by state. T30
+vs B30 pie chart.
+Matplotlib, geopandas
+(optional)
+Chart: Geo Distribution
+ 60m
+ 7
+Folio count growth: Line chart Jan
+2022 to Dec 2025 showing growth
+from 13.26 to 26.12 crore.
+Plotly
+Chart: Folio Count Growth
+ 30m
+ 8
+Correlation matrix: Compute pairwise
+correlation of NAV returns across 10
+selected funds.
+Seaborn heatmap,
+numpy
+Chart: Correlation Matrix
+ 45m
+ 9
+Top holdings sector distribution:
+Pie/donut chart of sector weights
+across all equity fund portfolios.
+Matplotlib donut
+Chart: Sector Allocation
+ 30m
+10
+Summarise 10 key EDA findings as
+bullet points in notebook markdown
+cells
+Jupyter Markdown
+EDA_Findings.ipynb
+ 30m
+Day 3 Deliverables: EDA_Analysis.ipynb with 15+ charts, EDA_Findings summary, exported PNG charts
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 12 of 21
+DAY 4: Fund Performance Analytics
+ Week Day 4 | 7–8 hours
+Objectives
+ Compute all key performance and risk metrics from NAV history
+ Build a fund ranking/scoring model
+ Compare fund returns against benchmark indices
+ Identify best and worst performing funds per category
+ #
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 1
+Compute daily returns for all funds:
+daily_return = nav_t / nav_t-1 - 1
+Annualised return = (1 +
+daily_return).prod()^(252/n) - 1
+Pandas, numpy
+returns_computed.csv
+ 45m
+ 2
+Calculate CAGR for 1yr, 3yr, 5yr
+periods: CAGR = (NAV_end /
+NAV_start) ^ (1/n) - 1 for SBI
+Bluechip, HDFC Top 100, etc.
+Pandas groupby, numpy
+cagr_report.csv
+ 60m
+ 3
+Compute Sharpe Ratio: Sharpe = (Rp
+- Rf) / Std(Rp) Use Rf = 6.5% (RBI
+repo rate proxy) Annualise with
+sqrt(252)
+numpy, Pandas
+sharpe_values.csv
+ 45m
+ 4
+Compute Sortino Ratio: Sortino = (Rp
+- Rf) / Downside_Std where
+Downside_Std uses only negative
+return days
+numpy
+sortino_values.csv
+ 30m
+ 5
+Compute Alpha & Beta vs benchmark:
+Regress fund returns on Nifty 100
+returns (OLS) Alpha = intercept * 252,
+Beta = slope Use
+scipy.stats.linregress
+scipy, numpy
+alpha_beta.csv
+ 60m
+ 6
+Compute Maximum Drawdown:
+max_dd = min(NAV / running_max -
+1) Highlight worst drawdown period
+for each fund
+Pandas cummax, numpy
+max_drawdown.csv
+ 45m
+ 7
+Build Fund Scorecard (composite
+score 0-100): Score = 30%×(3yr
+return rank) + 25%×(Sharpe rank) +
+20%×(Alpha rank) + 15%×(Expense
+ratio rank, inverse) + 10%×(Max DD
+rank, inverse)
+Pandas rank, weighted
+sum
+fund_scorecard.csv
+ 60m
+ 8
+Benchmark comparison chart: Plot top
+5 funds vs Nifty 50 and Nifty 100 over
+3 years. Compute tracking error.
+Matplotlib, numpy std
+benchmark_chart.png
+ 45m
+Day 4 Deliverables: Performance_Analytics.ipynb, fund_scorecard.csv, alpha_beta.csv, benchmark
+comparison chart
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 13 of 21
+DAY 5: Dashboard Development (Power BI /
+Tableau)
+ Week Day 5 | 7–8 hours
+Objectives
+ Connect Power BI / Tableau to the SQLite database and cleaned CSVs
+ Build 4 interactive dashboard pages
+ Add slicers, drill-through, and tooltips
+ Publish / export the dashboard
+ #
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 1
+Connect Power BI to bluestock_mf.db
+(SQLite ODBC) OR import CSVs
+directly. Verify all 8 tables load
+correctly.
+Power BI / Tableau
+Data model loaded
+ 45m
+ 2
+Build PAGE 1 — Industry Overview:
+KPI Cards: Total AUM (Rs.81L Cr),
+SIP Inflows (Rs.31K Cr), Folios (26.12
+Cr), # Schemes (1908) Line chart:
+Industry AUM Jan2022-Dec2025 Bar
+chart: AUM by fund house (top 10)
+Power BI
+Dashboard Page 1
+ 75m
+ 3
+Build PAGE 2 — Fund Performance:
+Scatter plot: Return (X) vs
+Risk/StdDev (Y), bubble=AUM Table:
+Sortable fund scorecard Line chart:
+NAV of selected fund vs benchmark
+Slicer: Fund House, Category, Plan
+Power BI
+Dashboard Page 2
+ 75m
+ 4
+Build PAGE 3 — Investor Analytics:
+Map/Bar: Transaction amount by state
+Donut: SIP vs Lumpsum vs
+Redemption split Bar: Age group vs
+avg SIP amount Line: Monthly
+transaction volume Slicer: State, Age
+Group, City Tier
+Power BI
+Dashboard Page 3
+ 75m
+ 5
+Build PAGE 4 — SIP & Market
+Trends: Dual-axis: SIP Inflow (bar) +
+Nifty 50 (line) 2022-2025 Heat map:
+Category inflows by month Bar: Top 5
+categories by net inflow FY25 KPI:
+SIP accounts growth YoY
+Power BI
+Dashboard Page 4
+ 60m
+ 6
+Add tooltips, drill-through from fund
+table to NAV chart. Add Bluestock
+logo and colour theme.
+Power BI formatting
+Branded dashboard
+ 30m
+ 7
+Export dashboard to PDF. Export
+each page as PNG for the final report.
+Power BI Export
+Dashboard.pdf + 4 PNGs
+ 20m
+Day 5 Deliverables: bluestock_mf_dashboard.pbix (Power BI file), Dashboard.pdf, 4 page screenshots
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 14 of 21
+DAY 6: Advanced Analytics + Risk Metrics
+ Week Day 6 | 6–7 hours
+Objectives
+ Implement Value at Risk (VaR) and Conditional VaR
+ Perform investor cohort analysis
+ Build a simple fund recommendation model
+ Analyse sector concentration risk in portfolios
+ #
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 1
+Compute Historical VaR (95%) for
+each fund: VaR = 5th percentile of
+daily return distribution CVaR = mean
+of returns below VaR threshold
+numpy percentile,
+Pandas
+var_cvar_report.csv
+ 60m
+ 2
+Compute Rolling 90-day Sharpe Ratio
+for 5 funds: rolling_sharpe =
+returns.rolling(90).mean() /
+returns.rolling(90).std() * sqrt(252)
+Plot over time
+Pandas rolling,
+Matplotlib
+rolling_sharpe_chart.png
+ 45m
+ 3
+Investor cohort analysis: Group
+investors by first transaction year
+(2024/2025) Compute average SIP
+amount, total invested, fund
+preference by cohort
+Pandas groupby, pivot
+cohort_analysis.csv
+ 60m
+ 4
+SIP continuation analysis: For each
+investor with 6+ SIP transactions,
+compute average gap between
+transactions. Flag investors with gaps
+> 35 days as 'at-risk'
+Pandas date diff,
+groupby
+sip_continuity.csv
+ 45m
+ 5
+Simple fund recommendation logic:
+Input: investor risk appetite
+(Low/Moderate/High) Output: Top 3
+funds by Sharpe ratio within matching
+risk_grade Print recommendation
+table
+Python functions,
+Pandas filter
+recommender.py
+ 45m
+ 6
+Sector concentration analysis: For
+each equity fund, compute
+Herfindahl-Hirschman Index (HHI) of
+sector weights. HHI =
+sum(weight_i^2). High HHI =
+concentrated portfolio.
+numpy, Pandas groupby
+sector_hhi.csv + chart
+ 45m
+ 7
+Write advanced analytics summary
+with 5 key insights (e.g. which funds
+have highest VaR, which cohorts
+invest most, etc.)
+Jupyter Markdown
+Advanced_Analytics.ipynb
+ 30m
+Day 6 Deliverables: Advanced_Analytics.ipynb, var_cvar_report.csv, rolling_sharpe_chart.png,
+recommender.py
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 15 of 21
+DAY 7: Final Report + Presentation + Deployment
+ Week Day 7 | 6–7 hours
+Objectives
+ Write the comprehensive final project report (PDF)
+ Create a 12-slide presentation deck
+ Clean and document all code (README, docstrings)
+ Push final code to GitHub with proper README
+ Optional: Deploy dashboard to Power BI Service / Tableau Public
+ #
+ Task
+ Tools / Tech
+ Output / Deliverable
+Time
+ 1
+Write Final Report (this document
+serves as template): Sections:
+Executive Summary, Data, ETL, EDA
+Findings, Performance Analysis,
+Dashboard Screenshots,
+Recommendations, Limitations
+Word / LaTeX / Python
+ReportLab
+Final_Report.pdf (15–20 pages)
+ 120
+ m
+ 2
+Create 12-slide presentation deck:
+Slide 1: Title Slide 2: Problem &
+Objective Slide 3: Data Sources Slide
+4: Architecture Slide 5-6: EDA
+Highlights Slide 7-8: Performance
+Metrics Slide 9-10: Dashboard
+Screenshots Slide 11: Key Findings
+Slide 12: Thank You
+PowerPoint / Google
+Slides
+Bluestock_MF_Presentation.ppt
+x
+ 90m
+ 3
+Clean all Python scripts: Add
+docstrings, remove debug prints Add
+README.md to each folder Create
+master run script: python
+run_pipeline.py
+VS Code, Python
+Clean codebase
+ 45m
+ 4
+Write root README.md: Project
+overview, setup instructions, file
+descriptions, how to run ETL, how to
+open dashboard
+Markdown, Git
+README.md
+ 30m
+ 5
+Final GitHub push: git add . git commit
+-m 'Final: Complete Bluestock MF
+Capstone' git push origin main Tag
+release: git tag v1.0
+Git, GitHub
+Public GitHub repo
+ 20m
+ 6
+Optional: Publish Power BI dashboard
+to Power BI Service (free account).
+OR publish to Tableau Public: File →
+Publish to Tableau Public
+Power BI Service /
+Tableau Public
+Public dashboard URL
+ 30m
+ 7
+Self-review checklist: ✓ All 8
+objectives met? ✓ All 7 deliverables
+submitted? ✓ Code runs without
+errors? ✓ Dashboard loads correctly?
+✓ Report is professional?
+Checklist
+Submission-ready package
+ 15m
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 16 of 21
+Day 7 Deliverables: Final_Report.pdf, Presentation.pptx, clean GitHub repo with README, dashboard
+published
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 17 of 21
+6. Technical Stack Details
+Category
+Tool / Library
+Version
+Purpose
+Language
+Python
+3.10+
+All data processing, ETL, analytics
+Data Manipulation
+Pandas
+2.0+
+DataFrames, cleaning, aggregation
+Numerical
+NumPy
+1.24+
+Risk metrics, statistical functions
+Visualisation
+Matplotlib
+3.7+
+Static charts for reports
+Visualisation
+Seaborn
+0.12+
+Heatmaps, distributions
+Visualisation
+Plotly
+5.x
+Interactive charts in Jupyter
+Database
+SQLite3
+Built-in
+Local relational database
+ORM
+SQLAlchemy
+2.0
+Python-to-SQLite interface
+Statistics
+SciPy
+1.10+
+OLS regression for Beta/Alpha
+Notebooks
+Jupyter Lab
+4.x
+EDA and analytics notebooks
+Dashboard
+Power BI Desktop
+Latest
+Interactive BI dashboard
+Dashboard (alt)
+Tableau Desktop
+2024.x
+Alternative to Power BI
+Version Control
+Git + GitHub
+Latest
+Code versioning, submission
+API
+mfapi.in
+v1
+Live NAV data (no auth required)
+API (alt)
+mfdata.in
+v1
+NAV + expense ratio data
+HTTP Client
+Requests
+2.30+
+API calls from Python
+IDE
+VS Code / PyCharm
+Latest
+Code development
+Reporting
+ReportLab / Word
+4.x
+Final PDF report
+6.1 Folder Structure
+bluestock_mf_capstone/ ■■■ data/ ■ ■■■ raw/ ← Original downloaded files ■ ■■■ processed/
+← Cleaned, merged CSVs ■ ■■■ db/ ← bluestock_mf.db (SQLite) ■■■ notebooks/ ■ ■■■
+01_data_ingestion.ipynb ■ ■■■ 02_data_cleaning.ipynb ■ ■■■ 03_eda_analysis.ipynb ■ ■■■
+04_performance_analytics.ipynb ■ ■■■ 05_advanced_analytics.ipynb ■■■ scripts/ ■ ■■■
+etl_pipeline.py ← Master ETL script ■ ■■■ live_nav_fetch.py ← mfapi.in fetcher ■ ■■■
+compute_metrics.py ← Performance metrics ■ ■■■ recommender.py ← Fund recommender ■■■ sql/
+■ ■■■ schema.sql ← CREATE TABLE statements ■ ■■■ queries.sql ← 10 analytical queries ■■■
+dashboard/ ■ ■■■ bluestock_mf.pbix ← Power BI dashboard ■■■ reports/ ■ ■■■
+Final_Report.pdf ■ ■■■ Presentation.pptx ■■■ README.md
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 18 of 21
+7. Deliverables & Evaluation Rubric
+#
+Deliverable
+Format
+Weight
+Evaluation Criteria
+D1
+ETL Pipeline Script
+Python .py
+15%
+Code quality, handles errors, runs without manual steps
+D2
+SQLite Database
+.db file
+10%
+Correct schema, all data loaded, queries run correctly
+D3
+EDA Notebook
+.ipynb
+15%
+Depth of analysis, chart quality, insights documented
+D4
+Performance Metrics
+.ipynb + CSV
+15%
+Mathematical accuracy, correct use of risk formulas
+D5
+Interactive Dashboard
+.pbix or .twbx
+20%
+Design quality, functionality, all 4 pages complete
+D6
+Advanced Analytics
+.ipynb
+10%
+VaR correctness, cohort analysis insight quality
+D7
+Final Report + Slides
+.pdf + .pptx
+15%
+Professional quality, completeness, clarity of findings
+7.1 Bonus Challenges (Optional +10 marks each)
+ Deploy ETL pipeline as a scheduled script that auto-fetches NAV from mfapi.in every weekday at 8 PM
+ Build a simple Streamlit web app as an alternative to Power BI for the dashboard
+ Implement a Monte Carlo simulation to project NAV growth over 5 years with uncertainty bands
+ Add a portfolio optimisation module (Markowitz Efficient Frontier) for 5 selected funds
+ Create an automated email report generator that sends weekly performance summary as HTML
+7.2 Common Mistakes to Avoid
+Mistake
+Correct Approach
+■ Using simulated random NAV data without
+anchoring to real values
+■ Use the real AMFI NAV anchor values provided in the dataset
+generator
+■ Hard-coding file paths
+■ Use pathlib.Path or os.path.join for cross-platform
+compatibility
+■ Not handling weekends/holidays in NAV data
+■ Use forward-fill (ffill) after reindexing to full date range
+■ Computing CAGR with calendar days instead of
+trading days
+■ Count actual rows (trading days) or use (252/n_days)
+annualisation
+■ Dashboard with no filters/slicers
+■ Every page must have at least 2 interactive slicers
+■ Confusing AUM (lakh crore) with scheme-level
+AUM (crore)
+■ Always include units in column names: aum_lakh_crore vs
+aum_crore
+■ Uploading .db files >100MB to GitHub
+■ Add *.db to .gitignore; upload schema.sql + instructions
+instead
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 19 of 21
+8. Appendix: Dataset Schema Reference
+01_fund_master.csv
+Column
+Type
+Description
+amfi_code
+TEXT
+AMFI unique scheme code (e.g. 125497 = HDFC Top 100 Direct)
+fund_house
+TEXT
+AMC name (e.g. SBI Mutual Fund, HDFC Mutual Fund)
+scheme_name
+TEXT
+Full official AMFI scheme name
+category
+TEXT
+Equity / Debt / Hybrid
+sub_category
+TEXT
+Large Cap / Mid Cap / Small Cap / Liquid / etc.
+plan
+TEXT
+Regular or Direct
+launch_date
+DATE
+Fund launch date (YYYY-MM-DD)
+benchmark
+TEXT
+Official benchmark index
+expense_ratio_pct
+REAL
+Annual expense ratio in % (e.g. 1.05)
+exit_load_pct
+REAL
+Exit load % (0 for Liquid/Index funds)
+fund_manager
+TEXT
+Name of primary fund manager
+risk_category
+TEXT
+SEBI risk category: Low / Moderate / High / Very High
+sebi_category_code
+TEXT
+Internal code: EC01=LargeCap, EC03=SmallCap, DC01=Liquid
+02_nav_history.csv
+Column
+Type
+Description
+amfi_code
+TEXT
+Foreign key to fund_master
+date
+DATE
+NAV date (business days only)
+nav
+REAL
+NAV in Rs. (e.g. 892.4560). Anchored to real mfapi.in values.
+04_monthly_sip_inflows.csv
+Column
+Type
+Description
+month
+TEXT
+YYYY-MM format
+sip_inflow_crore
+REAL
+Total SIP inflows in Rs. crore (real AMFI data)
+active_sip_accounts_crore
+REAL
+Number of actively contributing SIP accounts in crore
+new_sip_accounts_lakh
+REAL
+New SIP registrations in that month (lakh accounts)
+sip_aum_lakh_crore
+REAL
+Total SIP assets under management in Rs. lakh crore
+yoy_growth_pct
+REAL
+YoY growth % in SIP inflows (computed)
+07_scheme_performance.csv
+Column
+Type
+Description
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 20 of 21
+return_1yr_pct
+REAL
+1-year absolute return %
+return_3yr_pct
+REAL
+3-year CAGR %
+return_5yr_pct
+REAL
+5-year CAGR %
+benchmark_3yr_pct
+REAL
+Benchmark index 3yr CAGR for comparison
+alpha
+REAL
+Return above benchmark (return_3yr - benchmark_3yr)
+beta
+REAL
+Sensitivity to market (1.0 = same as market)
+sharpe_ratio
+REAL
+Risk-adjusted return (higher is better, >1 is good)
+sortino_ratio
+REAL
+Like Sharpe but penalises only downside volatility
+std_dev_ann_pct
+REAL
+Annualised standard deviation of daily returns (%)
+max_drawdown_pct
+REAL
+Worst peak-to-trough decline (negative value)
+morningstar_rating
+INT
+1-5 star rating (simulated, based on Sharpe)
+08_investor_transactions.csv
+Column
+Type
+Description
+investor_id
+TEXT
+Unique investor identifier (INV000001 to INV005000)
+transaction_date
+DATE
+Date of SIP/Lumpsum/Redemption
+amfi_code
+TEXT
+Fund in which transaction occurred
+transaction_type
+TEXT
+SIP / Lumpsum / Redemption
+amount_inr
+INT
+Transaction amount in Indian Rupees
+state
+TEXT
+Investor's state (12 Indian states covered)
+city
+TEXT
+Investor's city
+city_tier
+TEXT
+T30 (Top 30 cities) or B30 (Beyond Top 30) per AMFI classification
+age_group
+TEXT
+18-25 / 26-35 / 36-45 / 46-55 / 56+
+gender
+TEXT
+Male / Female
+annual_income_lakh
+REAL
+Annual income in Rs. lakh
+payment_mode
+TEXT
+UPI / Net Banking / Mandate / Cheque
+kyc_status
+TEXT
+Verified (92%) / Pending (8%)
+Note on Data Authenticity
+All AMFI codes, fund names, fund houses, benchmarks, expense ratios, and AUM figures in these datasets are sourced
+from publicly available AMFI India data, mfapi.in, and financial news sources (Cafemutual, Business Standard). NAV
+values are anchored to real historical values and simulated forward using realistic return/volatility parameters consistent
+with actual market behaviour. Investor transaction data is synthetically generated but uses real geographic, demographic,
+and behavioural distributions observed in the Indian MF market. This project is intended for educational purposes and skill
+development at Bluestock Fintech.
+Bluestock Fintech  |  Mutual Fund Analytics Capstone  |  Page 21 of 21

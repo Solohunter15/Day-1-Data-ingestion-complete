@@ -1,0 +1,87 @@
+table dim_fund
+	lineageTag: 224bfca9-345b-4233-9455-84c433fdfd68
+
+	column amfi_code
+		dataType: int64
+		lineageTag: f58d41e8-aaba-4707-a40d-d2b84679a833
+		sourceColumn: amfi_code
+
+	column fund_house
+		dataType: string
+		lineageTag: cf88b1dc-51fa-41c4-8886-d3c0767a9404
+		sourceColumn: fund_house
+
+	column scheme_name
+		dataType: string
+		lineageTag: 7a693615-290d-42b4-abc1-782cf7cb8762
+		sourceColumn: scheme_name
+
+	column category
+		dataType: string
+		lineageTag: 0aac1c4b-f706-4c1a-ab9d-c5801b3f4ad2
+		sourceColumn: category
+
+	column sub_category
+		dataType: string
+		lineageTag: 0710336b-0b8c-4d72-985b-7d31d07ce269
+		sourceColumn: sub_category
+
+	column plan
+		dataType: string
+		lineageTag: cfd0ae57-e88d-49e5-afa0-a4884bf4a172
+		sourceColumn: plan
+
+	column launch_date
+		dataType: string
+		lineageTag: 95fafe43-117a-4ebc-8a51-b0fe7fbd4427
+		sourceColumn: launch_date
+
+	column benchmark
+		dataType: string
+		lineageTag: d5b9c064-77ea-4052-88cf-2ea674f4dc90
+		sourceColumn: benchmark
+
+	column expense_ratio_pct
+		dataType: double
+		lineageTag: 1671c9c5-f652-45c7-ad10-bda98a5d09b8
+		sourceColumn: expense_ratio_pct
+
+	column exit_load_pct
+		dataType: double
+		lineageTag: 23800eb4-a68b-404b-8682-a135200d085a
+		sourceColumn: exit_load_pct
+
+	column min_sip_amount
+		dataType: int64
+		lineageTag: 4ebb38cf-3145-4261-8c80-9e09a3e60c0c
+		sourceColumn: min_sip_amount
+
+	column min_lumpsum_amount
+		dataType: int64
+		lineageTag: a777c3d5-1c9a-46cc-847c-b560bdbd1a10
+		sourceColumn: min_lumpsum_amount
+
+	column fund_manager
+		dataType: string
+		lineageTag: e3a341b1-2196-40b0-afb6-01f6268acb2f
+		sourceColumn: fund_manager
+
+	column risk_category
+		dataType: string
+		lineageTag: 8e0aee7d-a0d3-4490-98a7-2e8d94f0b3ab
+		sourceColumn: risk_category
+
+	column sebi_category_code
+		dataType: string
+		lineageTag: 1f6fdb79-8826-40bf-aa2d-f37ef46f6d0d
+		sourceColumn: sebi_category_code
+
+	partition dim_fund-Partition = m
+		source =
+				let
+				    Source = Csv.Document(File.Contents("c:\\Users\\jibum\\OneDrive\\Desktop\\Bluestock Internship\\day 2\\data\\processed\\01_fund_master.csv"),[Delimiter=",", Columns=15, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"amfi_code", Int64.Type}, {"expense_ratio_pct", type number}, {"exit_load_pct", type number}, {"min_sip_amount", Int64.Type}, {"min_lumpsum_amount", Int64.Type}})
+				in
+				    #"Changed Type"
+

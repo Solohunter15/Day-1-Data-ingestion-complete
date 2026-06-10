@@ -1,0 +1,61 @@
+table dim_date
+	lineageTag: 8cc59017-eece-44b1-a703-5b34f565b7cd
+
+	column date
+		dataType: string
+		lineageTag: f1bc4e67-212c-4ab4-8cca-39fe140011b7
+		sourceColumn: date
+
+	column year
+		dataType: int64
+		lineageTag: 2cb0db35-1c2d-4acc-9c1c-5b30ef22cb97
+		sourceColumn: year
+
+	column month
+		dataType: int64
+		lineageTag: 17507c31-a2f7-4b71-bcb8-f3b8b81efb59
+		sourceColumn: month
+
+	column quarter
+		dataType: int64
+		lineageTag: ad855eaa-8dd3-4505-8eb3-f669ea68bf93
+		sourceColumn: quarter
+
+	column is_weekday
+		dataType: int64
+		lineageTag: 89ff2dba-c032-4bc3-95b9-2470e628ea60
+		sourceColumn: is_weekday
+
+	column day
+		dataType: string
+		lineageTag: c3a7f92f-3b92-42fa-80a2-d7b6d3803e00
+		summarizeBy: none
+		sourceColumn: day
+
+		annotation SummarizationSetBy = Automatic
+
+	column month_name
+		dataType: string
+		lineageTag: a51068a8-5bb7-4353-8a30-2a90dee31f5c
+		summarizeBy: none
+		sourceColumn: month_name
+
+		annotation SummarizationSetBy = Automatic
+
+	column day_name
+		dataType: string
+		lineageTag: d9e9308a-6c3e-42c7-af66-d8fc52293756
+		summarizeBy: none
+		sourceColumn: day_name
+
+		annotation SummarizationSetBy = Automatic
+
+	partition dim_date-Partition = m
+		source =
+				let
+				    Source = Csv.Document(File.Contents("c:\\Users\\jibum\\OneDrive\\Desktop\\Bluestock Internship\\day 2\\data\\processed\\dim_date.csv"),[Delimiter=",", Columns=8, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Promoted Headers",{{"year", Int64.Type}, {"month", Int64.Type}, {"quarter", Int64.Type}, {"is_weekday", Int64.Type}})
+				in
+				    #"Changed Type"
+

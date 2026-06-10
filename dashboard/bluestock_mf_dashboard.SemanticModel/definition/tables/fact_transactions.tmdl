@@ -1,0 +1,78 @@
+table fact_transactions
+	lineageTag: e95658b2-d851-4ac2-83af-67203674a73d
+
+	column investor_id
+		dataType: string
+		lineageTag: 3a19e92b-d526-4af8-9504-a13f623e1449
+		sourceColumn: investor_id
+
+	column date
+		dataType: string
+		lineageTag: d3c56f8c-dd05-4673-8ed1-e5520967fcbd
+		sourceColumn: date
+
+	column amfi_code
+		dataType: int64
+		lineageTag: 719eac23-bbc7-4ae9-93f7-b8c6b89ded79
+		sourceColumn: amfi_code
+
+	column transaction_type
+		dataType: string
+		lineageTag: fba970cf-5e4c-4f45-ab59-e965425d47cf
+		sourceColumn: transaction_type
+
+	column amount_inr
+		dataType: int64
+		lineageTag: 4ce82727-4cf9-4a7c-9de3-f7a9e98a8965
+		sourceColumn: amount_inr
+
+	column state
+		dataType: string
+		lineageTag: f150691f-9e2d-452a-91b3-477186d6f511
+		sourceColumn: state
+
+	column city
+		dataType: string
+		lineageTag: 97b44cf5-9810-46ee-a296-44f43394afe2
+		sourceColumn: city
+
+	column city_tier
+		dataType: string
+		lineageTag: 2ea120ae-6d6f-48f5-becf-cf3e01701329
+		sourceColumn: city_tier
+
+	column age_group
+		dataType: string
+		lineageTag: d0c7f202-b94f-481c-8355-1955140a1a20
+		sourceColumn: age_group
+
+	column gender
+		dataType: string
+		lineageTag: d7e33c88-7e1a-4419-84e9-68eaccf1e7aa
+		sourceColumn: gender
+
+	column annual_income_lakh
+		dataType: double
+		lineageTag: a6a19a05-e61b-4e4a-910c-60851c9f5aea
+		sourceColumn: annual_income_lakh
+
+	column payment_mode
+		dataType: string
+		lineageTag: d91e2a04-c2bd-4195-9087-b8fd7e69347f
+		sourceColumn: payment_mode
+
+	column kyc_status
+		dataType: string
+		lineageTag: 4e41fd31-7b1b-45aa-94c7-3e79e27f8f8a
+		sourceColumn: kyc_status
+
+	partition fact_transactions-Partition = m
+		source =
+				let
+				    Source = Csv.Document(File.Contents("c:\\Users\\jibum\\OneDrive\\Desktop\\Bluestock Internship\\day 2\\data\\processed\\08_investor_transactions.csv"),[Delimiter=",", Columns=13, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+				    #"Promoted Headers" = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+				    #"Renamed Columns" = Table.RenameColumns(#"Promoted Headers",{{"transaction_date", "date"}}),
+				    #"Changed Type" = Table.TransformColumnTypes(#"Renamed Columns",{{"amfi_code", Int64.Type}, {"amount_inr", Int64.Type}, {"annual_income_lakh", type number}})
+				in
+				    #"Changed Type"
+
