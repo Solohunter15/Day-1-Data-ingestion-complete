@@ -19,3 +19,6 @@ env/
 *.log
 *.tmp
 *.pbix.backup
+
+# Local scratch directory
+scratch/
