@@ -1,114 +1,142 @@
-# Mutual Fund Analytics Platform 📈
-### End-to-End Data Engineering & ETL Pipeline — Bluestock Capstone Project
+# Bluestock Mutual Fund Analytics Platform 📈
+### End-to-End Data Engineering, ETL Pipeline & Interactive Business Intelligence Dashboard
+**Prepared by:** Intern / Data Analyst — Bluestock Fintech  
+**Date:** June 2026  
+**Version:** v1.0 (Production Release)  
 
-Welcome to the **Mutual Fund Analytics Platform** Capstone Project repository, developed as part of the Bluestock Fintech Internship program. 
-
-This repository leverages a clean **Monorepo Structure** to organize the end-to-end development of a financial analytics platform that ingests, cleans, stores, analyzes, and visualizes Indian Mutual Fund datasets.
+Welcome to the production-ready **Mutual Fund Analytics Platform** repository. This platform ingests historical and live mutual fund data from public sources (AMFI India, NSE, mfapi.in), transforms it through a robust Python ETL pipeline, loads it into a normalized SQLite relational star schema database, computes quantitative risk-adjusted performance indicators, and serves interactive insights via a Power BI business intelligence dashboard.
 
 ---
 
-## 📁 7-Day Monorepo Folder Structure
+## 📁 Repository Structure
 
-The repository is structured as a progressive daily monorepo. Each day's work is self-contained within its respective folder:
+The monorepo has been cleaned and consolidated from daily progressive staging directories into a standard production layout:
 
 ```text
-bluestock-mutual-fund-analytics/
+bluestock_mf_capstone/
 │
-├── .git/
-├── .gitignore
-├── requirements.txt            # Unified project dependencies
-├── README.md                   # Master repository documentation (You are here)
+├── data/
+│   ├── raw/                  <- Raw CSV source datasets (01_fund_master.csv to 10_benchmark_indices.csv)
+│   ├── processed/            <- Preprocessed, cleaned, and forward-filled CSVs
+│   └── db/                   <- Production SQLite database (bluestock_mf.db)
 │
-├── day 1/                      # Day 1: Project Setup + Data Ingestion (ETL)
-│   ├── data_ingestion.py       # Local ETL bootstrapping, loading, & validation pipeline
-│   ├── live_nav_fetch.py       # Live daily NAV fetcher from mfapi.in
-│   ├── sql/                    # PostgreSQL DDL staging queries
-│   ├── dashboard/              # Staging directory for dashboard assets
-│   ├── notebooks/              # Jupyter research environment
-│   ├── reports/                # Day 1 data quality reports & Word generator
-│   └── README.md               # Day 1 documentation & workflows
+├── notebooks/                <- Relational research and analytical notebooks
+│   ├── 03_eda_analysis.ipynb          <- Exploratory Data Analysis (EDA) notebook
+│   ├── 04_performance_analytics.ipynb  <- Volatility and CAGR calculations
+│   └── 05_advanced_analytics.ipynb     <- Advanced risk metrics (VaR, CVaR, HHI, Cohorts)
 │
-├── day 2/                      # Day 2: Data Cleaning + SQLite Database Design
-│   ├── data/                   # Self-contained Day 2 data directory
-│   │   ├── raw/                # Raw source datasets (CSVs + Scraped JSONs)
-│   │   └── processed/          # Downstream validated & forward-filled CSVs
-│   ├── schema.sql              # Star Schema relational DDL (facts and dimensions)
-│   ├── queries.sql             # 10 comprehensive analytical SQL queries
-│   ├── db_loader.py            # SQLite database creation & insertion script
-│   ├── execute_queries.py      # Automated SQL execution harness
-│   ├── data_dictionary.md      # Database column reference and business definitions
-│   └── bluestock_mf.db         # Loaded SQLite database instance (~10.5 MB)
+├── scripts/                  <- Pipeline modules and document generators
+│   ├── live_nav_fetch.py     <- Ingests daily NAVs for 6 schemes from mfapi.in API
+│   ├── etl_pipeline.py       <- Preprocesses raw CSVs, executes DDL, and populates SQLite
+│   ├── compute_metrics.py    <- Calculates performance, risk (Sharpe, Sortino, VaR, CVaR), and portfolio HHI
+│   ├── recommender.py        <- CLI fund recommendation tool based on risk appetite
+│   ├── generate_report.py    <- ReportLab generator compiling the 19-page final PDF report
+│   └── generate_presentation.py <- python-pptx generator compiling the 12-slide presentation deck
 │
-├── day 3/                      # Day 3: Exploratory Data Analysis (EDA)
-│   ├── EDA_Analysis.ipynb      # Main Jupyter notebook containing the 10 core analyses
-│   └── charts/                 # 15 interactive and static data visualization assets
+├── sql/                      <- Relational database scripts
+│   ├── schema.sql            <- Relational DDL tables and index structures
+│   └── queries.sql           <- 10 core analytical business queries
 │
-├── day 4/                      # Day 4: Mutual Fund Performance Analytics & Scorecard
-│   ├── Performance_Analytics.ipynb # Main quantitative analytics Jupyter notebook
-│   ├── reports/                # Computed risk-return tables
-│   │   ├── alpha_beta.csv      # Alpha, Beta, R-squared & p-values OLS regression metrics
-│   │   └── fund_scorecard.csv  # 0-100 composite scorecard & rankings
-│   └── README.md               # Day 4 detailed performance & ranking documentation
+├── dashboard/                <- Business Intelligence assets
+│   ├── bluestock_mf_dashboard.pbip <- Power BI Desktop project descriptor
+│   └── page_1.png to page_4.png <- Visual screenshots of the dashboard pages
 │
-├── day 5/                      # Day 5: Interactive BI Dashboard & Web Deployment
-│   ├── Dashboard.pdf           # Combined 4-page exported report
-│   ├── page_1.png to page_4.png # Individual page screenshots
-│   ├── dashboard/              # Streamlit application scripts
-│   ├── bluestock_mf_dashboard.pbix.pbip # Power BI project descriptor
-│   └── README.md               # Day 5 documentation & deployment guide
+├── reports/                  <- Final analytical outputs and presentations
+│   ├── Final_Report.pdf      <- Final comprehensive 19-page analytical report
+│   ├── Bluestock_MF_Presentation.pptx <- 12-slide presentation slide deck
+│   └── charts/               <- Generated matplotlib/seaborn charts embedded in reports
 │
-└── day 6/                      # Day 6: Advanced Analytics & Risk Metrics
-    ├── Advanced_Analytics.ipynb # Main quantitative analytics Jupyter notebook
-    ├── var_cvar_report.csv      # Computed VaR & CVaR report for all 40 schemes
-    ├── recommender.py           # Command-line fund recommendation tool
-    ├── rolling_sharpe_chart.png # Time-series rolling Sharpe ratio chart
-    └── README.md                # Day 6 detailed risk-return & cohort documentation
+├── run_pipeline.py           <- Master platform orchestrator
+├── requirements.txt            <- Consolidated project python dependencies
+└── README.md                 <- System documentation (You are here)
 ```
 
 ---
 
-## 🚀 Progressive Project Roadmap
+## 🚀 Installation & Setup Instructions
 
-### 📅 [Day 1: Project Setup + Data Ingestion](file:///c:/Users/jibum/OneDrive/Desktop/Bluestock%20Internship/day%201/README.md)
-*   **ETL Bootstrap Ingestion:** Completed local python pipeline in `day 1/data_ingestion.py` that auto-generates raw dataset structures and audits file metrics.
-*   **Live NAV Fetcher:** Real-time JSON parser in `day 1/live_nav_fetch.py` scraping historical NAVs for 6 core mutual fund schemes directly from the public AMFI REST API (`mfapi.in`).
-*   **Quality Reports:** Comprehensive data quality and referential integrity audit generated in `day 1/reports/day1_data_quality_summary.md`.
+### 1. Clone the Repository
+```bash
+git clone https://github.com/Solohunter15/bluestock-mutual-fund-analytics.git
+cd bluestock-mutual-fund-analytics
+```
 
-### 📅 [Day 2: Data Cleaning + SQLite DB Design](file:///c:/Users/jibum/OneDrive/Desktop/Bluestock%20Internship/day%202/data_dictionary.md)
-*   **Robust Data Cleaning:** Implemented parsing, deduplication, anomaly boundaries, and daily continuous **forward-filling** for holiday/weekend NAV tracking in `day 2/data_cleaning.py`.
-*   **Dimensional Star Schema:** Designed a normalized relational model in `day 2/schema.sql` spanning 2 dimension tables (`dim_fund`, `dim_date`) and 6 fact tables (`fact_nav`, `fact_transactions`, etc.).
-*   **SQL Analytics:** Drafted 10 high-value business queries in `day 2/queries.sql` analyzing AUM trends, monthly average NAVs, YoY growth, and investor demographic cash flows.
+### 2. Install Python Dependencies
+Ensure you have Python 3.10+ installed. Install the platform dependencies via pip:
+```bash
+pip install -r requirements.txt
+pip install reportlab python-pptx
+```
 
-### 📅 [Day 3: Exploratory Data Analysis](file:///c:/Users/jibum/OneDrive/Desktop/Bluestock%20Internship/day%203/EDA_Analysis.ipynb)
-*   **Table Schema Ingestion**: Built connection handlers to load facts and dimensions dynamically into Pandas dataframes.
-*   **10 Key Analytical Dashboards**: Generated 15 interactive charts (Plotly/Seaborn) analyzing historical NAVs, AUM growth, demographics, geographic distributions, folio growth, and correlation metrics.
-*   **Insight Discovery**: Documented 10 key findings regarding folio-AUM elasticity, SIP ticket size distribution, and demographic concentrations.
-
-### 📅 [Day 4: Mutual Fund Performance Analytics & Scorecard](file:///c:/Users/jibum/OneDrive/Desktop/Bluestock%20Internship/day%204/README.md)
-*   **Quantitative Computations**: Coded multi-period CAGR calculations (1yr, 3yr, and 4.4yr proxies) and aligned NAV return series against Nifty 100 benchmark calendars.
-*   **Risk-Adjusted Efficiency**: Computed annualized Sharpe and Sortino Ratios using excess returns relative to a 6.5% risk-free rate and downside deviation.
-*   **OLS Benchmark Regressions**: Conducted regressions vs. Nifty 100, extracting Alpha (active outperformance), Beta (volatility factor), R-squared, and regression p-value significance.
-*   **Composite Scoring**: Created a 0-100 scale investment ranking scorecard weighting 3yr CAGR (30%), Sharpe (25%), Alpha (20%), Expense Ratio (15%), and Max Drawdown (10%), with Mirae Asset Large Cap Fund scoring highest (85.90).
-
-### 📅 [Day 5: Interactive BI Dashboard & Web Deployment](file:///c:/Users/jibum/OneDrive/Desktop/Bluestock%20Internship/day%205/README.md)
-*   **Web Dashboard App**: Developed a 5-page Streamlit application reflecting Power BI analytics layout, matching Bluestock Fintech brand colors and typography.
-*   **Star Schema Connection**: Integrated SQLite star schema to power real-time visualizations (AUM growth, risk-return scatters, geo-demographic transactions, and benchmark comparisons).
-*   **Automated Exports**: Wrote Playwright-based browser automation to render and capture all dashboard views and compile a unified `Dashboard.pdf` report.
-
-### 📅 [Day 6: Advanced Analytics & Risk Metrics](file:///c:/Users/jibum/OneDrive/Desktop/Bluestock%20Internship/day%206/README.md)
-*   **Risk Metrics Evaluation:** Computed 95% Historical VaR and 95% CVaR for all 40 schemes, exporting results to `var_cvar_report.csv`. Aligned returns with Nifty 100 calendar to prevent weekend distortions.
-*   **Performance Tracking:** Plotted 90-day annualized rolling Sharpe ratios for 5 major schemes over a 4.4-year timeline, outputting `rolling_sharpe_chart.png`.
-*   **Investor Cohorts:** Categorized investor transactions by first transaction year, computing average SIP amounts, gross/net invested capital, and top fund preference.
-*   **Operational Health:** Evaluated gaps between transaction dates for investors with 6+ SIPs, flagging 97.8% as "at-risk" due to average transaction gaps exceeding 35 days.
-*   **Sector Concentration:** Calculated Sector HHI across all equity portfolios. Axis Bluechip was identified as the most concentrated (HHI: 2,967.69) and UTI Mid Cap as the most diversified (HHI: 1,240.20).
-*   **Standalone Recommendation System:** Built `recommender.py` to recommend the top 3 mutual funds matching user risk appetites (`Low` / `Moderate` / `High`), sorted by Sharpe ratio.
+### 3. Run the Master Orchestration Pipeline
+Execute the master pipeline runner script to run the entire data engineering and quantitative analytics suite end-to-end:
+```bash
+python run_pipeline.py
+```
+This single command triggers the following phases:
+1. **Live NAV Ingestion:** Fetches real-time NAV datasets for 6 major schemes from `mfapi.in` and saves raw responses.
+2. **ETL Preprocessing:** Standardizes dates, cleans types, forward-fills weekend/holiday gaps, and builds the relational tables in `data/db/bluestock_mf.db` after executing the DDL scripts.
+3. **Performance Calculations:** Computes CAGR, risk ratios (Sharpe, Sortino), OLS regression (Alpha, Beta), downside risk (Value at Risk, CVaR), and sector portfolio HHI. Updates `fact_performance` table in the database and writes processed CSV reports and charts.
+4. **Recommender CLI:** Executes a verification test run recommending top funds for a Moderate risk appetite.
 
 ---
 
-## 🛠️ Technical Stack Details
+## 🔍 Running the Tools Independently
 
-*   **Language:** Python 3.10+ (Pandas, NumPy, Requests)
-*   **Database Engine:** SQLite3
-*   **SQL Interfaces:** standard SQLite SQL DDL
-*   **ORM / Drivers:** Python-native SQLite3 connector
-*   **Version Control:** Git + GitHub
+### Run the Fund Recommender CLI Tool
+```bash
+python scripts/recommender.py [low/moderate/high]
+```
+If no arguments are provided, it will launch an interactive command prompt.
+
+### Compile the 19-Page Final PDF Report
+```bash
+python scripts/generate_report.py
+```
+Outputs the professional final PDF report to `reports/Final_Report.pdf`.
+
+### Compile the 12-Slide PowerPoint Presentation
+```bash
+python scripts/generate_presentation.py
+```
+Outputs the slide deck to `reports/Bluestock_MF_Presentation.pptx`.
+
+---
+
+## 📊 Relational Database Schema Design (Star Schema)
+
+The SQLite database `data/db/bluestock_mf.db` features a normalized star schema:
+
+```mermaid
+erDiagram
+    dim_fund ||--o{ fact_nav : "amfi_code"
+    dim_fund ||--o{ fact_transactions : "amfi_code"
+    dim_fund ||--|| fact_performance : "amfi_code"
+    dim_fund ||--o{ fact_portfolio : "amfi_code"
+    dim_date ||--o{ fact_nav : "date"
+    dim_date ||--o{ fact_transactions : "transaction_date"
+    dim_date ||--o{ fact_aum : "date"
+```
+
+### Table Registry
+*   **`dim_fund` (Dimension):** Static details of 40 schemes (AMFI codes, AMC, category, plans, expense ratio, manager, risk category).
+*   **`dim_date` (Dimension):** Pre-populated date dimensions (2022-2026 calendar mapping year, quarter, month, and weekday status).
+*   **`fact_nav` (Fact):** Daily historical NAVs and daily returns, reindexed and forward-filled, and aligned with market trading days.
+*   **`fact_transactions` (Fact):** 32,778 transaction logs (SIP, lumpsum, redemptions) for 5,000 investors with demographic metrics (age, gender, state, city tier).
+*   **`fact_performance` (Fact):** Risk-adjusted statistics, CAGR periods, Sharpe, Sortino, Alpha, Beta, Max Drawdowns, and ratings.
+*   **`fact_portfolio` (Fact):** Top equity holdings weight percentages and sectors as of December 2025.
+*   **`fact_aum` (Fact):** Quarterly assets (Rs. crore) for the top 10 AMCs.
+*   **`fact_sip_industry` (Fact):** Monthly industry SIP inflows, active accounts, and YoY growth.
+
+---
+
+## 💡 Key Business & Financial Takeaways
+
+1.  **SIP Continuity & Churn Vulnerability:** SIP continuity analysis on investors with 6+ SIP transactions reveals that **97.80% (1,332 investors)** have average transaction gaps exceeding **35 days**. The global average gap stands at **64.89 days**, double the standard 30-day billing cycle. This points to irregular savings behavior, highlighting the need for automated mandate validation and notifications.
+2.  **Sector Concentration Risk (HHI):** Sector Herfindahl-Hirschman Index (HHI) rankings reveal that Large Cap portfolios exhibit higher sector concentration. **Axis Bluechip Fund (Regular)** is the most concentrated portfolio with a sector HHI of **2,967.69** across only 7 sectors. **UTI Mid Cap Fund (Regular)** represents the most diversified equity portfolio with an HHI of **1,240.20** across 10 sectors.
+3.  **Downside Risk Profiles (VaR/CVaR):** Small Cap funds exhibited the highest downside exposure. **SBI Small Cap Fund (Direct)** and **Axis Small Cap Fund (Regular)** show the highest daily Historical VaR (95%) of approximately **-2.52%** and **-2.43%** respectively. In the worst 5% of trading days, the average daily loss (CVaR) increases to **-3.23%**. Debt and Liquid funds remain stable with daily VaR of **-0.08%** and CVaR of **-0.10%**.
+4.  **Investor Cohort Expansion:** The **2024 cohort** comprises 4,803 investors contributing a gross investment of **Rs. 225.8 crore** (Net: Rs. 102.5 crore). The **2025 cohort** is smaller (197 investors) contributing **Rs. 1.90 crore** (Net: Rs. 0.75 crore). However, the average monthly SIP amount for the 2025 cohort is **Rs. 13,505.21**, which represents a **22.8% increase** compared to the 2024 cohort's average of **Rs. 10,996.89**, showing that newer cohorts commit larger ticket sizes.
+5.  **Scorecard Best Performers:**
+    *   **Large Cap Category:** HDFC Top 100 Fund (Regular) leads the moderate-risk category with a Sharpe ratio of **1.06** and a 3-Year CAGR of **14.84%**.
+    *   **Mid Cap Category:** Kotak Emerging Equity Fund (Regular) leads the high-risk category with a Sharpe ratio of **0.96** and a 3-Year CAGR of **18.23%**.
+    *   **Small Cap Category:** SBI Small Cap Fund (Direct) leads with a 3-Year CAGR of **23.14%** but exhibits higher volatility.
